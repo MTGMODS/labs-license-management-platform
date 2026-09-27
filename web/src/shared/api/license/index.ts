@@ -251,22 +251,16 @@ function normalizeSalesStats(raw: SalesStatsWire): LicenseSalesStats {
   }
 }
 
-/**
- * Public sales figures behind the VIP page.
- *
- * This is the one endpoint that wraps its payload in `{ status, data }`;
- * `/info` on the very same service returns the object directly, so the
- * envelope is unwrapped here rather than in the shared HTTP layer.
- */
+/** Public sales figures behind the VIP page. */
 export async function getLicenseSalesStats(signal?: AbortSignal): Promise<LicenseSalesStats> {
-  const response = await request<{ status: string; data: SalesStatsWire }>({
+  const response = await request<SalesStatsWire>({
     service: 'license',
     path: '/stats/public',
     signal,
     timeoutMs: STATS_REQUEST_TIMEOUT_MS,
   })
 
-  return normalizeSalesStats(response.data)
+  return normalizeSalesStats(response)
 }
 
 export async function getTariffs(signal?: AbortSignal): Promise<TariffsCatalog> {
