@@ -28,13 +28,6 @@ export const FUNPAY_OFFERS: readonly DurationOffer[] = [
   { days: 365, url: 'https://funpay.com/lots/offer?id=65052581' },
 ]
 
-export const CRYPTO_BOT_INVOICES: readonly DurationOffer[] = [
-  { days: 7, url: 'https://t.me/send?start=IV8PhmOnRBEk' },
-  { days: 30, url: 'https://t.me/send?start=IVlf1GJfoAsx' },
-  { days: 90, url: 'https://t.me/send?start=IVwtjvcrdSUP' },
-  { days: 365, url: 'https://t.me/send?start=IVbjbBr50bKw' },
-]
-
 export const CRYPTO_EXCHANGES = [
   { id: 'binance', label: 'Binance ID', value: '311112419', brand: 'binance' as const },
   { id: 'bybit', label: 'Bybit ID', value: '70782166', brand: 'bybit' as const },

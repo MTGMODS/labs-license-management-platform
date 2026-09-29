@@ -15,7 +15,6 @@ import {
 import {
   CONTACT_DISCORD_URL,
   CONTACT_URL,
-  CRYPTO_BOT_INVOICES,
   CRYPTO_EXCHANGES,
   CRYPTO_NETWORKS,
   FRAGMENT_STARS_URL,
@@ -361,17 +360,6 @@ function CryptoBody() {
         {CRYPTO_EXCHANGES.map((item) => (
           <CopyRow key={item.id} label={item.label} value={item.value} brand={item.brand} />
         ))}
-      </div>
-
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-fg">{t('payment.routes.crypto.cryptoBot')}</p>
-        <div className="space-y-3 rounded-2xl bg-ink-900/50 p-3.5 ring-1 ring-white/6 sm:p-4">
-          <p className="flex items-center gap-2 text-sm text-fg-muted">
-            <BrandMark brand="cryptobot" className="size-5 shrink-0" />
-            {t('payment.routes.crypto.cryptoBotFee')}
-          </p>
-          <OfferButtons offers={CRYPTO_BOT_INVOICES} />
-        </div>
       </div>
 
       <div className="space-y-2">
