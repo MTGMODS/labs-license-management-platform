@@ -7,14 +7,21 @@ from app.shared.database import engine, Base
 from app.shared import datetime_utils as _datetime_utils
 from app.shared.exceptions import DomainException, global_exception_handler, validation_exception_handler
 from app.shared.config import settings
+from app.infrastructure.stats_cache import PublicStatsCache
 from app.api.routes import router as usage_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    yield
-    await engine.dispose()
+    app.state.public_stats_cache = PublicStatsCache.from_url(
+        settings.REDIS_URL, "mtgmods:usage:public_stats:v1",
+    )
+    try:
+        yield
+    finally:
+        await app.state.public_stats_cache.aclose()
+        await engine.dispose()
 
 app = FastAPI(
     title="Usage Analytics Service",

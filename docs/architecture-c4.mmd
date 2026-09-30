@@ -28,6 +28,7 @@ flowchart LR
       LicenseDB[("Container: PostgreSQL<br/>License DB · licenses/devices/transactions")]
       UsageDB[("Container: PostgreSQL<br/>Usage DB · launches")]
       Rabbit["Container: RabbitMQ<br/>file-generation RPC + bot commands"]
+      Redis[("Container: Redis<br/>shared public stats cache + refresh locks")]
       Assets["Private production overlay<br/>VIP template + obfuscator library"]
       BuildFiles[("Mounted builds volume<br/>temporary personalized files")]
       TgBot["Container: Telegram bot"]
@@ -37,6 +38,8 @@ flowchart LR
     UserAPI --> UserDB
     LicenseAPI --> LicenseDB
     UsageAPI --> UsageDB
+    LicenseAPI -->|Redis protocol · sales stats| Redis
+    UsageAPI -->|Redis protocol · usage stats| Redis
     LicenseAPI -->|HTTP · profile/social ID lookup| UserAPI
     LicenseAPI -->|RabbitMQ · file request and RPC wait| Rabbit
     Rabbit -->|file_generation_queue| DistributionAPI
@@ -67,4 +70,4 @@ flowchart LR
   class Player person
   class Helper,Telegram,Discord,OAuth,Nginx external
   class Web,UserAPI,LicenseAPI,UsageAPI,DistributionAPI,Rabbit,TgBot,DsBot app
-  class UserDB,LicenseDB,UsageDB,Assets,BuildFiles data
+  class UserDB,LicenseDB,UsageDB,Redis,Assets,BuildFiles data

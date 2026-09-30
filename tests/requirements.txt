@@ -1,0 +1,4 @@
+-r ../services/license/requirements.txt
+-r ../services/usage/requirements.txt
+pytest==9.0.1
+fakeredis[lua]==2.31.1

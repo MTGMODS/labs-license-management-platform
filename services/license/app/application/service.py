@@ -11,6 +11,7 @@ from app.domain.schemas import GeneratePurchaseDTO, ActivateKeyDTO, UpdateLicens
 from app.infrastructure.repository import LicenseRepository, TransactionRepository, LicenseModel, TransactionModel
 from app.shared.exceptions import DomainException
 from app.infrastructure.external_clients import UserServiceClient
+from app.infrastructure.stats_cache import PublicStatsCache
 
 class LicenseService:
     def __init__(self, db: AsyncSession):
@@ -371,46 +372,14 @@ class LicenseService:
             raise DomainException(message="License not found", status_code=404, error_code="NOT_FOUND")
 
 class LicenseStatsService:
-    _cached_stats = None
-    _cache_expires_at = None
-    _is_generating = False
+    def __init__(self, cache: PublicStatsCache):
+        self.cache = cache
 
-    def __init__(self, db):
-        self.repo = LicenseRepository(db)
-
-    async def get_website_stats(self, background_tasks: BackgroundTasks = None):
-        now = datetime.now(timezone.utc)
-
-        if LicenseStatsService._cached_stats and LicenseStatsService._cache_expires_at and now < LicenseStatsService._cache_expires_at:
-            return LicenseStatsService._cached_stats
-
-        if LicenseStatsService._cached_stats is not None:
-            if not LicenseStatsService._is_generating and background_tasks is not None:
-                LicenseStatsService._is_generating = True
-                background_tasks.add_task(LicenseStatsService._generate_background_stats)
-            return LicenseStatsService._cached_stats
-
-        LicenseStatsService._is_generating = True
-        try:
-            stats = await self.repo.get_heavy_public_stats()
-            LicenseStatsService._cached_stats = stats
-            LicenseStatsService._cache_expires_at = datetime.now(timezone.utc) + timedelta(minutes=5)
-        finally:
-            LicenseStatsService._is_generating = False
-
-        return LicenseStatsService._cached_stats
+    async def get_website_stats(self, background_tasks: BackgroundTasks):
+        return await self.cache.get(self._load_stats, background_tasks)
 
     @staticmethod
-    async def _generate_background_stats():
-        try:
-            async with AsyncSessionLocal() as db_session:
-                repo = LicenseRepository(db_session)
-                stats = await repo.get_heavy_public_stats()
-                
-                LicenseStatsService._cached_stats = stats
-                LicenseStatsService._cache_expires_at = datetime.now(timezone.utc) + timedelta(minutes=5)
-                print("VIP background stats generation completed.")
-        except Exception as e:
-            print(f"Error in VIP background stats generation: {e}")
-        finally:
-            LicenseStatsService._is_generating = False
+    async def _load_stats():
+        # A refresh owns its DB session, including when it runs after the response.
+        async with AsyncSessionLocal() as db:
+            return await LicenseRepository(db).get_heavy_public_stats()

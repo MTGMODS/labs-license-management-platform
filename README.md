@@ -17,7 +17,7 @@ APIs talk over HTTP and RabbitMQ. Bots and license↔user stay on the **Docker n
 
 ## Stack
 
-Python 3.12, FastAPI, PostgreSQL 16 (one database per service), RabbitMQ 3.13, React 19 + Vite, Docker Compose.
+Python 3.12, FastAPI, PostgreSQL 16 (one database per service), Redis 7.4, RabbitMQ 3.13, React 19 + Vite, Docker Compose.
 
 ## Run
 
@@ -68,6 +68,10 @@ Bots call `http://license-service:8000/api/v1/license/...`. After switching from
 
 ## Local API without Docker
 
+License and Usage use `REDIS_URL` (default `redis://redis:6379/0` in Compose).
+For a locally installed Redis, use `redis://127.0.0.1:6379/0`.
+Without Redis, public statistics are computed from the database on each request.
+
 ```bash
 cd services/user   # or license / usage / distribution
 python -m venv venv
@@ -78,6 +82,60 @@ fastapi dev main.py --port 8001
 ```
 
 Ports: **8001 / 8002 / 8003 / 8005**. Vite for the SPA: `cd web && npm ci && npm run dev` (port 5173; optional `VITE_DEV_*_TARGET` in `web/.env.example`).
+
+## Public statistics cache
+
+License and Usage share Redis with separate keys:
+
+- `mtgmods:license:public_stats:v1`
+- `mtgmods:usage:public_stats:v1`
+
+Both public endpoints return their statistics directly. Redis stores an internal
+JSON envelope with `data` and `fresh_until`; this envelope is not exposed by the API.
+Results are fresh for 5 minutes and retained for up to 24 hours. A request for
+stale statistics returns the previous result immediately and schedules a refresh
+in the serving FastAPI process, with a separate database session.
+
+A per-key Redis lock coordinates both background refreshes and cold starts across
+processes. The lock lasts 120 seconds; computation is limited to 90 seconds.
+Publication and release check the owner's token atomically, so an old worker
+cannot overwrite a newer result or release another worker's lock. If a process
+dies, the lock expires and a later request retries the refresh.
+
+On a cold cache, the lock owner computes the first response. Other requests wait
+up to 4 seconds, then receive HTTP 503 with `Retry-After: 2` if data is still
+unavailable. The web client has a 5-second stats timeout, so the first visit after
+a cache reset can require a retry. Failed background refreshes preserve old data.
+Redis connection/command timeouts are 0.5 seconds with no automatic retries;
+when Redis is unavailable, statistics fall back to uncached DB reads. This keeps
+the endpoint usable but can increase DB load during a Redis outage.
+
+Redis has no published host port or configured persistence; restarting it clears
+this rebuildable cache. API container restarts keep using the existing Redis data.
+Health endpoints do not require Redis. There is no timer: refreshes are driven by
+requests. The heavy SQL and the public response shapes are unchanged.
+
+Existing production deployment (PostgreSQL and the other services already running):
+
+```bash
+docker compose up -d redis
+docker compose up -d --build --no-deps license-service usage-service
+docker compose exec -T redis redis-cli ping
+curl -fsS http://127.0.0.1:8002/api/v1/license/stats/public
+curl -fsS http://127.0.0.1:8003/api/v1/usage/stats/public
+docker compose exec -T redis redis-cli --scan --pattern 'mtgmods:*:public_stats:v1*'
+```
+
+The default Redis URL works with existing service `.env` files; set `REDIS_URL`
+in both files only to override it. No database migration is needed.
+
+Cache and HTTP contract tests (isolated SQLite and fakeredis with Lua support;
+no production credentials or running Docker required):
+
+```bash
+python -m pip install -r tests/requirements.txt
+python -m pytest tests -q
+```
 
 ## License
 

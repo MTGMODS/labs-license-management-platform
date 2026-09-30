@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from app.shared.database import engine, Base
 from app.shared.config import settings
+from app.infrastructure.stats_cache import PublicStatsCache
 from app.shared import datetime_utils as _datetime_utils
 from app.shared.exceptions import DomainException, global_exception_handler, validation_exception_handler
 from app.application.worker import check_expired_licenses_task
@@ -21,9 +22,16 @@ async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     task = asyncio.create_task(check_expired_licenses_task())
-    yield
-    task.cancel()
-    await engine.dispose()
+    app.state.public_stats_cache = PublicStatsCache.from_url(
+        settings.REDIS_URL, "mtgmods:license:public_stats:v1",
+    )
+    try:
+        yield
+    finally:
+        task.cancel()
+        await asyncio.gather(task, return_exceptions=True)
+        await app.state.public_stats_cache.aclose()
+        await engine.dispose()
 
 app = FastAPI(
     title="License Service",
