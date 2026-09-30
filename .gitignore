@@ -18,3 +18,9 @@ venv/
 web/node_modules/
 web/dist/
 web/dist-ssr/
+
+.pytest_cache/
+.coverage
+htmlcov/
+test-results/
+web/coverage/

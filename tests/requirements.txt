@@ -1,4 +1,8 @@
 -r ../services/license/requirements.txt
 -r ../services/usage/requirements.txt
+-r ../services/user/requirements.txt
+-r ../services/distribution/requirements.txt
+-r ../bots/telegram/requirements.txt
+-r ../bots/discord/requirements.txt
 pytest==9.0.1
 fakeredis[lua]==2.31.1
