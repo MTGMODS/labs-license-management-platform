@@ -129,13 +129,29 @@ docker compose exec -T redis redis-cli --scan --pattern 'mtgmods:*:public_stats:
 The default Redis URL works with existing service `.env` files; set `REDIS_URL`
 in both files only to override it. No database migration is needed.
 
-Cache and HTTP contract tests (isolated SQLite and fakeredis with Lua support;
-no production credentials or running Docker required):
+## Automated tests
+
+Regression tests cover all four backend services, both bots and the web client.
+Python tests use isolated SQLite databases, temporary files, fakeredis with Lua
+support and mocked external APIs; no production credentials or running Docker
+are required. Install test dependencies in a virtual environment:
 
 ```bash
 python -m pip install -r tests/requirements.txt
 python -m pytest tests -q
 ```
+
+Web tests (HTTP/auth/session logic, API contracts and React route guards):
+
+```bash
+cd web
+npm ci
+npm test
+```
+
+See [tests/README.md](tests/README.md) for setup, per-component commands, covered
+scenarios and explicit limitations. These tests do not replace live
+PostgreSQL/RabbitMQ integration or real-browser end-to-end testing.
 
 ## License
 
