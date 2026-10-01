@@ -1,0 +1,194 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: Python / ${{ matrix.component }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - component: user
+            path: services/user
+            tests: tests/system/test_user.py
+          - component: license
+            path: services/license
+            tests: tests/system/test_license.py tests/system/test_expiry_worker.py
+          - component: usage
+            path: services/usage
+            tests: tests/system/test_usage.py
+          - component: distribution
+            path: services/distribution
+            tests: tests/system/test_distribution.py
+          - component: telegram-bot
+            path: bots/telegram
+            tests: tests/system/test_telegram.py
+          - component: discord-bot
+            path: bots/discord
+            tests: tests/system/test_discord.py
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: |
+            tests/requirements.txt
+            services/*/requirements.txt
+            bots/*/requirements.txt
+      - name: Install test and lint dependencies
+        run: python -m pip install -r tests/requirements.txt ruff==0.13.3
+      - name: Build ${{ matrix.component }} (compile Python sources)
+        run: |
+          python -m compileall -q '${{ matrix.path }}'
+          python -m pip check
+      - name: Lint ${{ matrix.component }} (blocking)
+        run: python -m ruff check '${{ matrix.path }}'
+      - name: Test ${{ matrix.component }}
+        run: python -m pytest ${{ matrix.tests }} -q
+      - name: Test shared statistics cache and HTTP contract
+        if: matrix.component == 'license' || matrix.component == 'usage'
+        run: python -m pytest tests/test_public_stats_cache.py tests/test_public_stats_api.py -k '${{ matrix.component }}' -q
+
+  web:
+    name: Web
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Build web
+        run: npm run build
+      - name: Lint web (blocking)
+        run: npm run lint
+      - name: Test web
+        run: npm test
+
+  image-build:
+    name: Build image / ${{ matrix.component }}
+    needs: [python, web]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - component: user
+            path: services/user
+          - component: license
+            path: services/license
+          - component: usage
+            path: services/usage
+          - component: distribution
+            path: services/distribution
+          - component: telegram-bot
+            path: bots/telegram
+          - component: discord-bot
+            path: bots/discord
+          - component: web
+            path: web
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image locally (no registry push)
+        run: docker build --tag 'lab-${{ matrix.component }}:ci' '${{ matrix.path }}'
+      - name: Verify image exists
+        run: docker image inspect 'lab-${{ matrix.component }}:ci' --format '{{.Id}}'
+
+  publish:
+    name: Publish image / ${{ matrix.component }}
+    if: github.event_name == 'push'
+    needs: [python, web, image-build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - component: user
+            path: services/user
+          - component: license
+            path: services/license
+          - component: usage
+            path: services/usage
+          - component: distribution
+            path: services/distribution
+          - component: telegram-bot
+            path: bots/telegram
+          - component: discord-bot
+            path: bots/discord
+          - component: web
+            path: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and publish commit SHA (latest only on main)
+        shell: bash
+        run: |
+          image="ghcr.io/${GITHUB_REPOSITORY,,}-${{ matrix.component }}"
+          tag="${image}:sha-${GITHUB_SHA}"
+          docker build \
+            --label "org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}" \
+            --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
+            --tag "$tag" '${{ matrix.path }}'
+          docker push "$tag"
+          if [[ "$GITHUB_REF" == 'refs/heads/main' ]]; then
+            docker tag "$tag" "${image}:latest"
+            docker push "${image}:latest"
+          fi
+
+  verify-published:
+    name: Verify published / ${{ matrix.component }}
+    if: github.event_name == 'push'
+    needs: [publish]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [user, license, usage, distribution, telegram-bot, discord-bot, web]
+    steps:
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull and run published image
+        shell: bash
+        run: |
+          image="ghcr.io/${GITHUB_REPOSITORY,,}-${{ matrix.component }}:sha-${GITHUB_SHA}"
+          docker pull "$image"
+          if [[ '${{ matrix.component }}' == 'web' ]]; then
+            docker run --detach --name lab-web-smoke --publish 127.0.0.1:18080:8080 "$image"
+            trap 'docker rm --force lab-web-smoke >/dev/null' EXIT
+            for attempt in {1..20}; do
+              if curl --fail --silent http://127.0.0.1:18080/ >/dev/null; then exit 0; fi
+              sleep 1
+            done
+            docker logs lab-web-smoke
+            exit 1
+          fi
+          docker run --rm --entrypoint python "$image" --version
