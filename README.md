@@ -131,6 +131,10 @@ in both files only to override it. No database migration is needed.
 
 ## Automated tests
 
+For the DevOps Continuous Integration lab, see
+[docs/devops-lab2.md](docs/devops-lab2.md) for workflow jobs, GHCR tags,
+branch protection checks and the blocked-PR demonstration.
+
 Regression tests cover all four backend services, both bots and the web client.
 Python tests use isolated SQLite databases, temporary files, fakeredis with Lua
 support and mocked external APIs; no production credentials or running Docker

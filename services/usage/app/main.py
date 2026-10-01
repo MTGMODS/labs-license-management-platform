@@ -4,7 +4,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.shared.database import engine, Base
-from app.shared import datetime_utils as _datetime_utils
+from app.shared import datetime_utils as _datetime_utils  # noqa: F401 - register UTC JSON encoder
 from app.shared.exceptions import DomainException, global_exception_handler, validation_exception_handler
 from app.shared.config import settings
 from app.infrastructure.stats_cache import PublicStatsCache

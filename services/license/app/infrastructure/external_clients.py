@@ -12,8 +12,10 @@ class UserServiceClient:
         async with httpx.AsyncClient() as client:
             try:
                 params = {}
-                if telegram_id: params["telegram_id"] = telegram_id
-                if discord_id: params["discord_id"] = discord_id
+                if telegram_id:
+                    params["telegram_id"] = telegram_id
+                if discord_id:
+                    params["discord_id"] = discord_id
                 
                 response = await client.get(f"{self.base_url}/api/v1/users/resolve", params=params, headers=self.headers)
                 if response.status_code == 200:

@@ -1,4 +1,7 @@
-import json, aio_pika, uuid, asyncio
+import json
+import aio_pika
+import uuid
+import asyncio
 from app.shared.config import settings
 
 async def publish_file_generation_event(user_id: int, expire_date: str = None) -> str:

@@ -59,8 +59,10 @@ class AuthService:
             elif db_user.status == UserStatus.DELETED:
                 raise DomainException("This account was deleted.", status_code=403, error_code="USER_DELETED")
             
-            if safe_nickname: db_user.nickname = safe_nickname
-            if avatar_url: db_user.avatar_url = avatar_url
+            if safe_nickname:
+                db_user.nickname = safe_nickname
+            if avatar_url:
+                db_user.avatar_url = avatar_url
             
             db_user.last_login_at = func.now() 
             db_user = await self.repo.update(db_user)

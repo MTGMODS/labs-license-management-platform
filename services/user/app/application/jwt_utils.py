@@ -1,4 +1,8 @@
-import jwt, hmac, hashlib, secrets, time
+import jwt
+import hmac
+import hashlib
+import secrets
+import time
 from jwt import PyJWKClient
 from urllib.parse import parse_qsl
 from datetime import datetime, timedelta, timezone

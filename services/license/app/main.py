@@ -6,7 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from app.shared.database import engine, Base
 from app.shared.config import settings
 from app.infrastructure.stats_cache import PublicStatsCache
-from app.shared import datetime_utils as _datetime_utils
+from app.shared import datetime_utils as _datetime_utils  # noqa: F401 - register UTC JSON encoder
 from app.shared.exceptions import DomainException, global_exception_handler, validation_exception_handler
 from app.application.worker import check_expired_licenses_task
 from app.api.client_routes import router as client_router

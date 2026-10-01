@@ -1,4 +1,5 @@
-import json, secrets
+import json
+import secrets
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import Column, Integer, String, Text, cast, BigInteger, DateTime, delete, select, Enum as SQLEnum
