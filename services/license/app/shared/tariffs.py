@@ -1,5 +1,4 @@
 import json
-from functools import lru_cache
 from pathlib import Path
 from typing import Optional
 from pydantic import BaseModel, Field
@@ -18,11 +17,16 @@ class TariffsCatalog(BaseModel):
     plans: list[TariffPlan]
 
 
-@lru_cache(maxsize=1)
+_tariffs_catalog: TariffsCatalog | None = None
+
+
 def load_tariffs() -> TariffsCatalog:
-    path = Path(__file__).with_name("tariffs.json")
-    with path.open(encoding="utf-8") as f:
-        return TariffsCatalog.model_validate(json.load(f))
+    global _tariffs_catalog
+    if _tariffs_catalog is None:
+        path = Path(__file__).with_name("tariffs.json")
+        with path.open(encoding="utf-8") as f:
+            _tariffs_catalog = TariffsCatalog.model_validate(json.load(f))
+    return _tariffs_catalog
 
 def public_tariffs() -> dict:
     catalog = load_tariffs()
