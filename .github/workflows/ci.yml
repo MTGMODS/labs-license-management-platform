@@ -106,7 +106,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build image locally (no registry push)
-        run: docker build --tag 'lab-${{ matrix.component }}:ci' '${{ matrix.path }}'
+        shell: bash
+        run: |
+          for attempt in 1 2 3; do
+            if docker build --tag 'lab-${{ matrix.component }}:ci' '${{ matrix.path }}'; then
+              exit 0
+            fi
+            if [[ "$attempt" -eq 3 ]]; then exit 1; fi
+            sleep $((attempt * 10))
+          done
       - name: Verify image exists
         run: docker image inspect 'lab-${{ matrix.component }}:ci' --format '{{.Id}}'
 
@@ -148,10 +156,16 @@ jobs:
         run: |
           image="ghcr.io/${GITHUB_REPOSITORY,,}-${{ matrix.component }}"
           tag="${image}:sha-${GITHUB_SHA}"
-          docker build \
-            --label "org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}" \
-            --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
-            --tag "$tag" '${{ matrix.path }}'
+          for attempt in 1 2 3; do
+            if docker build \
+              --label "org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}" \
+              --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
+              --tag "$tag" '${{ matrix.path }}'; then
+              break
+            fi
+            if [[ "$attempt" -eq 3 ]]; then exit 1; fi
+            sleep $((attempt * 10))
+          done
           docker push "$tag"
           if [[ "$GITHUB_REF" == 'refs/heads/main' ]]; then
             docker tag "$tag" "${image}:latest"
