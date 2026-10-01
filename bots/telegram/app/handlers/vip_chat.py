@@ -34,8 +34,8 @@ async def handle_join_request(update: Update, context: ContextTypes.DEFAULT_TYPE
     else:
         await context.bot.decline_chat_join_request(chat_id, telegram_id)
         decline_text = (
-            f"❌ <b>У вас нет активного VIP.</b>\n\n"
-            f"Чтобы приобрести VIP, перейдите на сайт хелпера по кнопке ниже или используйте команду /pay"
+            "❌ <b>У вас нет активного VIP.</b>\n\n"
+            "Чтобы приобрести VIP, перейдите на сайт хелпера по кнопке ниже или используйте команду /pay"
         )
         markup = InlineKeyboardMarkup([[
             InlineKeyboardButton("Открыть VIP кабинет", web_app=WebAppInfo(url=WEB_APP_URL))

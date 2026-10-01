@@ -29,10 +29,10 @@ class LaunchRepository:
         vip_percent = {}
         for p in LaunchRepository.PERIODS:
             u = users.get(p) or 0
-            l = launches.get(p) or 0
+            launch_count = launches.get(p) or 0
             gu = g_users.get(p) or 0
             user_share[p] = round((u / gu) * 100, 1) if gu > 0 else 0
-            launches_per_user[p] = round(l / u, 2) if u > 0 else 0
+            launches_per_user[p] = round(launch_count / u, 2) if u > 0 else 0
             if vip_users is not None:
                 vip_percent[p] = round(((vip_users.get(p) or 0) / u) * 100, 1) if u > 0 else 0
         result = {"user_share": user_share, "launches_per_user": launches_per_user}

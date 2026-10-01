@@ -1,4 +1,5 @@
-import asyncio, aio_pika
+import asyncio
+import aio_pika
 
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
@@ -9,7 +10,7 @@ from app.api.routes import router as download_router
 from app.application.worker import cleanup_old_files_task
 from app.infrastructure.messaging import process_message
 from app.shared.config import settings
-from app.shared import datetime_utils as _datetime_utils
+from app.shared import datetime_utils as _datetime_utils  # noqa: F401 - register UTC JSON encoder
 from app.shared.exceptions import DomainException, global_exception_handler, validation_exception_handler
 
 

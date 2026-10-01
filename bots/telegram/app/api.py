@@ -29,7 +29,7 @@ class APIClient:
                 elif response.status in (404, 400):
                     return {"is_vip": False}
                 elif response.status in (401, 403):
-                    print(f"[API Error] Unauthorized: Invalid BOT_SECRET_TOKEN")
+                    print("[API Error] Unauthorized: Invalid BOT_SECRET_TOKEN")
                     return {"error": True}
                 else:
                     print(f"[API Error] Backend returned status {response.status}")
@@ -55,7 +55,8 @@ class APIClient:
             return {"error": True}
 
     async def generate_license(self, duration_days: int, amount: float, max_devices: int, reset_limit: int) -> dict:
-        if not self.session: return {"error": True}
+        if not self.session:
+            return {"error": True}
 
         url = f"{BACKEND_API_URL}/generate/telegram_bot"
 

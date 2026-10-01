@@ -29,7 +29,7 @@ class APIClient:
                 elif response.status in (404, 400):
                     return {"is_vip": False}
                 elif response.status in (401, 403):
-                    print(f"[API Error] Unauthorized: Invalid BOT_SECRET_TOKEN")
+                    print("[API Error] Unauthorized: Invalid BOT_SECRET_TOKEN")
                     return {"error": True}
                 else:
                     print(f"[API Error] Backend returned status {response.status}")
