@@ -181,27 +181,27 @@ results. See [docs/highload-lab3.md](docs/highload-lab3.md).
 docker compose -f docker-compose.scaling.yml up --build -d
 ```
 
-## Kubernetes orchestration lab
+## Лабораторна робота з оркестрації Kubernetes
 
-DevOps Lab 3 deploys two License Service replicas plus PostgreSQL and Redis to a
-local Minikube cluster. The repository includes one manifest per Kubernetes
-object, health probes, resource constraints, ConfigMap/Secret configuration,
-persistent storage, Nginx Ingress, immutable GHCR image versions and reproducible
-self-healing, scaling, rolling-update, rollback and failure-diagnostics scenarios.
-See [docs/devops-lab3.md](docs/devops-lab3.md).
+У лабораторній роботі №3 два екземпляри License Service, PostgreSQL і Redis
+розгортаються в локальному Minikube-кластері. Репозиторій містить окремий
+маніфест для кожного Kubernetes-об’єкта, health probes, обмеження ресурсів,
+ConfigMap/Secret, постійне сховище, Nginx Ingress і відтворювані сценарії
+самовідновлення, масштабування, Rolling Update, rollback та діагностики збоїв.
+Повний звіт: [docs/devops-lab3.md](docs/devops-lab3.md).
 
 ```powershell
 kubectl apply -k k8s
 ```
 
-## Helm packaging lab
+## Лабораторна робота з Helm
 
-DevOps Lab 4 converts the Kubernetes baseline into a reusable Helm chart with
-release-derived names, parameterized dev/prod environments, optional Ingress and
-PVC, shared helpers, install notes, a pre-upgrade health hook and `helm test`.
-The verified release lifecycle is documented in
-[docs/devops-lab4.md](docs/devops-lab4.md), and the values table is in the
-[chart README](helm/mtgmods-license/README.md).
+У лабораторній роботі №4 Kubernetes-конфігурацію перетворено на повторно
+використовуваний Helm-чарт. Він формує імена з назви релізу, підтримує
+параметризовані dev/prod середовища, опціональні Ingress і PVC, спільні helpers,
+NOTES, pre-upgrade health hook та `helm test`. Перевірений життєвий цикл релізу
+описано в [docs/devops-lab4.md](docs/devops-lab4.md), а параметри values — у
+[README чарта](helm/mtgmods-license/README.md).
 
 ```powershell
 helm lint helm/mtgmods-license
