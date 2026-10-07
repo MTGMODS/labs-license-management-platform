@@ -1,9 +1,11 @@
 import json
 from pathlib import Path
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 class TariffLimits(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     max_devices: int = Field(ge=1)
     reset_limit: int = Field(ge=0)
 
@@ -13,8 +15,10 @@ class TariffPlan(TariffLimits):
     telegram_stars_price: Optional[int] = None
 
 class TariffsCatalog(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     currency: str = "USD"
-    plans: list[TariffPlan]
+    plans: tuple[TariffPlan, ...]
 
 
 _tariffs_catalog: TariffsCatalog | None = None
