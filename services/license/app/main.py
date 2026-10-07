@@ -1,9 +1,10 @@
 import asyncio
 import socket
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
+from sqlalchemy import text
 from app.shared.database import engine, Base
 from app.shared.config import settings
 from app.infrastructure.stats_cache import PublicStatsCache
@@ -63,8 +64,12 @@ INSTANCE_ID = settings.INSTANCE_ID or socket.gethostname()
 
 @app.middleware("http")
 async def add_instance_id_header(request, call_next):
+    delay_ms = max(0, settings.SYNTHETIC_DELAY_MS)
+    if delay_ms:
+        await asyncio.sleep(delay_ms / 1000)
     response = await call_next(request)
     response.headers["X-Instance-ID"] = INSTANCE_ID
+    response.headers["X-Instance-Delay-Ms"] = str(delay_ms)
     return response
 
 app.include_router(client_router)
@@ -73,13 +78,29 @@ app.include_router(stats_router)
 app.include_router(admin_router)
 app.include_router(bot_routes)
 
+@app.get("/health/live", tags=["System"])
+async def liveness_check():
+    return {
+        "status": "UP",
+        "service": "License Service",
+        "instance_id": INSTANCE_ID,
+    }
+
+
 @app.get("/health", tags=["System"])
-async def health_check():
+async def readiness_check():
     database = settings.DATABASE_POSTGRES_URL if not settings.DEBUG_MODE else settings.DATABASE_URL
+    try:
+        async with engine.connect() as connection:
+            await connection.execute(text("SELECT 1"))
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="Database is unavailable") from exc
+
     return {
         "status": "UP",
         "service": "License Service",
         "instance_id": INSTANCE_ID,
         "version": settings.APP_VERSION,
-        "database": database.split("://")[0]
+        "database": database.split("://")[0],
+        "database_status": "UP",
     }
