@@ -1,0 +1,15 @@
+flowchart LR
+    Client[Browser / curl] -->|HTTP, Host mtgmods.local| Ingress[Minikube Nginx Ingress]
+    Ingress -->|ClusterIP :80| Service[license-service Service]
+    Service --> Pod1[License Service pod 1]
+    Service --> Pod2[License Service pod 2]
+    Pod1 -->|SQL| Postgres[(PostgreSQL 16)]
+    Pod2 -->|SQL| Postgres
+    Pod1 -->|cache| Redis[(Redis 7.4)]
+    Pod2 -->|cache| Redis
+    Postgres --> PVC[(PersistentVolumeClaim 1 GiB)]
+    ConfigMap[ConfigMap] -. runtime config .-> Pod1
+    ConfigMap -. runtime config .-> Pod2
+    Secret[Secret] -. credentials .-> Pod1
+    Secret -. credentials .-> Pod2
+    InitJob[Database init Job] -->|create schema| Postgres

@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: license-db-init
+spec:
+  ttlSecondsAfterFinished: 600
+  backoffLimit: 6
+  template:
+    metadata:
+      labels:
+        app: license-db-init
+    spec:
+      restartPolicy: OnFailure
+      initContainers:
+        - name: wait-for-postgres
+          image: postgres:16-alpine
+          command:
+            - sh
+            - -c
+            - until pg_isready -h license-postgres -U "$POSTGRES_USER" -d "$POSTGRES_DB"; do sleep 2; done
+          envFrom:
+            - secretRef:
+                name: license-secrets
+      containers:
+        - name: schema-init
+          image: ghcr.io/mtgmods/labs-license-management-platform-license:sha-805ca0af230d9ece135982527f3c69ba6ca231b0
+          imagePullPolicy: IfNotPresent
+          command: ["python", "db_init.py"]
+          envFrom:
+            - configMapRef:
+                name: license-config
+            - secretRef:
+                name: license-secrets
