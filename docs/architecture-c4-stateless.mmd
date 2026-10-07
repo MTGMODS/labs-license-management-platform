@@ -1,0 +1,37 @@
+flowchart LR
+  Admin["Person: administrator / HTTP client"]
+
+  subgraph Lab["MTG MODS · Stateless Lab 2"]
+    Gateway["Container: Nginx gateway<br/>round-robin / least connections<br/>no sticky sessions"]
+
+    subgraph API["Interchangeable application instances"]
+      License1["Container: License Service 1<br/>FastAPI · X-Instance-ID"]
+      License2["Container: License Service 2<br/>FastAPI · X-Instance-ID"]
+    end
+
+    DBInit["One-shot container: DB schema init"]
+    ExpiryWorker["Container: License expiry worker<br/>single background consumer"]
+    LicenseDB[("PostgreSQL<br/>shared business state")]
+    Redis[("Redis<br/>shared stats cache + distributed lock")]
+    Rabbit["RabbitMQ<br/>externalized command queue"]
+  end
+
+  Admin -->|HTTP :18020| Gateway
+  Gateway -->|HTTP| License1
+  Gateway -->|HTTP| License2
+  Admin -.->|direct verification :18021| License1
+  Admin -.->|direct verification :18022| License2
+  License1 -->|SQL transactions| LicenseDB
+  License2 -->|SQL transactions| LicenseDB
+  License1 -->|Redis protocol| Redis
+  License2 -->|Redis protocol| Redis
+  DBInit -->|DDL before replicas start| LicenseDB
+  ExpiryWorker -->|atomic expiration update| LicenseDB
+  ExpiryWorker -->|bot commands| Rabbit
+
+  classDef app fill:#e8f1ff,stroke:#2563eb,color:#111827
+  classDef data fill:#ecfdf5,stroke:#059669,color:#111827
+  classDef person fill:#ffffff,stroke:#374151,color:#111827
+  class Admin person
+  class Gateway,License1,License2,DBInit,ExpiryWorker,Rabbit app
+  class LicenseDB,Redis data

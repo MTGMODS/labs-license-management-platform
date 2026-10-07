@@ -157,6 +157,18 @@ See [tests/README.md](tests/README.md) for setup, per-component commands, covere
 scenarios and explicit limitations. These tests do not replace live
 PostgreSQL/RabbitMQ integration or real-browser end-to-end testing.
 
+## Stateless architecture lab
+
+The High-Load / ІВСАВПЗ Lab 2 uses an isolated two-instance License Service
+deployment with a shared PostgreSQL/Redis state layer, a separate expiry worker,
+an Nginx load balancer and `X-Instance-ID` tracing. The state audit, updated C4
+diagram, PowerShell deployment steps, cross-instance CRUD flow and instance-loss
+scenario are documented in [docs/stateless-lab2.md](docs/stateless-lab2.md).
+
+```powershell
+docker compose -f docker-compose.stateless.yml up --build -d
+```
+
 ## License
 
 MIT — see `LICENSE` in the repository root.
