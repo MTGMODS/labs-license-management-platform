@@ -20,6 +20,7 @@ web/dist/
 web/dist-ssr/
 
 .pytest_cache/
+.pytest-temp/
 .coverage
 htmlcov/
 test-results/

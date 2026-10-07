@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     API_VERSION: str
     APP_VERSION: str
     DEBUG_MODE: bool
+    INSTANCE_ID: str | None = None
+    INITIALIZE_SCHEMA: bool = True
+    RUN_EXPIRY_WORKER: bool = True
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

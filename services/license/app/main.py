@@ -1,4 +1,5 @@
 import asyncio
+import socket
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,17 +20,23 @@ from app.api.bot_routes import router as bot_routes
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    task = asyncio.create_task(check_expired_licenses_task())
+    if settings.INITIALIZE_SCHEMA:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+
+    expiry_task = None
+    if settings.RUN_EXPIRY_WORKER:
+        expiry_task = asyncio.create_task(check_expired_licenses_task())
+
     app.state.public_stats_cache = PublicStatsCache.from_url(
         settings.REDIS_URL, "mtgmods:license:public_stats:v1",
     )
     try:
         yield
     finally:
-        task.cancel()
-        await asyncio.gather(task, return_exceptions=True)
+        if expiry_task is not None:
+            expiry_task.cancel()
+            await asyncio.gather(expiry_task, return_exceptions=True)
         await app.state.public_stats_cache.aclose()
         await engine.dispose()
 
@@ -51,6 +58,15 @@ app.add_middleware(
 app.add_exception_handler(DomainException, global_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 
+INSTANCE_ID = settings.INSTANCE_ID or socket.gethostname()
+
+
+@app.middleware("http")
+async def add_instance_id_header(request, call_next):
+    response = await call_next(request)
+    response.headers["X-Instance-ID"] = INSTANCE_ID
+    return response
+
 app.include_router(client_router)
 app.include_router(user_router)
 app.include_router(stats_router)
@@ -63,6 +79,7 @@ async def health_check():
     return {
         "status": "UP",
         "service": "License Service",
+        "instance_id": INSTANCE_ID,
         "version": settings.APP_VERSION,
         "database": database.split("://")[0]
     }

@@ -1,11 +1,24 @@
 from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from pydantic import ValidationError
 from sqlalchemy import func, select
 
 pytestmark = [pytest.mark.component("services/license"), pytest.mark.anyio, pytest.mark.integration]
+
+
+def test_tariff_catalog_is_read_once_on_first_request(component, monkeypatch):
+    tariffs = component("app.shared.tariffs")
+    monkeypatch.setattr(tariffs, "_tariffs_catalog", None)
+
+    with patch.object(tariffs.json, "load", wraps=tariffs.json.load) as read_json:
+        first = tariffs.public_tariffs()
+        second = tariffs.public_tariffs()
+
+    assert first == second
+    assert first["plans"]
+    read_json.assert_called_once()
 
 
 @pytest.fixture
