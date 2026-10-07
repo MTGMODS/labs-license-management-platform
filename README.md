@@ -181,6 +181,19 @@ results. See [docs/highload-lab3.md](docs/highload-lab3.md).
 docker compose -f docker-compose.scaling.yml up --build -d
 ```
 
+## Kubernetes orchestration lab
+
+DevOps Lab 3 deploys two License Service replicas plus PostgreSQL and Redis to a
+local Minikube cluster. The repository includes one manifest per Kubernetes
+object, health probes, resource constraints, ConfigMap/Secret configuration,
+persistent storage, Nginx Ingress, immutable GHCR image versions and reproducible
+self-healing, scaling, rolling-update, rollback and failure-diagnostics scenarios.
+See [docs/devops-lab3.md](docs/devops-lab3.md).
+
+```powershell
+kubectl apply -k k8s
+```
+
 ## License
 
 MIT — see `LICENSE` in the repository root.
