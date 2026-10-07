@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: license-config
+data:
+  APP_VERSION: "devops-lab3-v1"
+  API_VERSION: "v1"
+  DEBUG_MODE: "false"
+  REDIS_URL: "redis://redis:6379/0"
+  USER_SERVICE_URL: "http://user-service:8000"
+  INITIALIZE_SCHEMA: "false"
+  RUN_EXPIRY_WORKER: "false"
+  SYNTHETIC_DELAY_MS: "0"

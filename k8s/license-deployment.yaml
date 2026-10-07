@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: license-service
+  labels:
+    app: license-service
+spec:
+  replicas: 2
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: license-service
+  template:
+    metadata:
+      labels:
+        app: license-service
+        version: v1
+    spec:
+      initContainers:
+        - name: wait-for-schema
+          image: postgres:16-alpine
+          command:
+            - sh
+            - -c
+            - until PGPASSWORD="$POSTGRES_PASSWORD" psql -h license-postgres -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c 'SELECT 1 FROM licenses LIMIT 1' >/dev/null 2>&1; do sleep 2; done
+          envFrom:
+            - secretRef:
+                name: license-secrets
+      containers:
+        - name: license-service
+          image: ghcr.io/mtgmods/labs-license-management-platform-license:sha-805ca0af230d9ece135982527f3c69ba6ca231b0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: license-config
+            - secretRef:
+                name: license-secrets
+          env:
+            - name: INSTANCE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 2
