@@ -169,6 +169,18 @@ scenario are documented in [docs/stateless-lab2.md](docs/stateless-lab2.md).
 docker compose -f docker-compose.stateless.yml up --build -d
 ```
 
+## Horizontal scaling lab
+
+High-load / ІВСАВПЗ Lab 3 extends the stateless License Service into a private
+three-node upstream pool behind one Nginx entry point. It includes switchable
+Round Robin and Least Connections configs, a synthetic slow-node experiment,
+database-aware readiness, node-failure recovery and measured 1/2/3-instance
+results. See [docs/highload-lab3.md](docs/highload-lab3.md).
+
+```powershell
+docker compose -f docker-compose.scaling.yml up --build -d
+```
+
 ## License
 
 MIT — see `LICENSE` in the repository root.

@@ -1,0 +1,107 @@
+name: mtgmods_horizontal_scaling_lab3
+
+x-license-api: &license-api
+  image: mtgmods/lab3-license-service:local
+  restart: unless-stopped
+  env_file:
+    - ./services/license/.env.example
+  environment:
+    INITIALIZE_SCHEMA: "false"
+    RUN_EXPIRY_WORKER: "false"
+  depends_on:
+    license-db-init:
+      condition: service_completed_successfully
+    redis:
+      condition: service_healthy
+  healthcheck:
+    test:
+      [
+        "CMD",
+        "python",
+        "-c",
+        "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')",
+      ]
+    interval: 5s
+    timeout: 3s
+    retries: 10
+    start_period: 10s
+
+services:
+  license-postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file:
+      - ./services/license/.env.example
+    volumes:
+      - scaling_license_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  license-db-init:
+    build:
+      context: ./services/license
+      dockerfile: Dockerfile
+    image: mtgmods/lab3-license-service:local
+    env_file:
+      - ./services/license/.env.example
+    command: ["python", "db_init.py"]
+    depends_on:
+      license-postgres:
+        condition: service_healthy
+    restart: "no"
+
+  license-service-1:
+    <<: *license-api
+    environment:
+      INITIALIZE_SCHEMA: "false"
+      RUN_EXPIRY_WORKER: "false"
+      INSTANCE_ID: license-service-1
+      SYNTHETIC_DELAY_MS: "0"
+
+  license-service-2:
+    <<: *license-api
+    environment:
+      INITIALIZE_SCHEMA: "false"
+      RUN_EXPIRY_WORKER: "false"
+      INSTANCE_ID: license-service-2
+      SYNTHETIC_DELAY_MS: "0"
+
+  license-service-3:
+    <<: *license-api
+    environment:
+      INITIALIZE_SCHEMA: "false"
+      RUN_EXPIRY_WORKER: "false"
+      INSTANCE_ID: license-service-3
+      SYNTHETIC_DELAY_MS: "${SLOW_INSTANCE_DELAY_MS:-0}"
+
+  scaling-gateway:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "18100:8080"
+    volumes:
+      - ./deploy/horizontal-scaling/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ${SCALING_UPSTREAM_CONFIG:-./deploy/horizontal-scaling/upstream-round-robin.conf}:/etc/nginx/upstream.conf:ro
+    depends_on:
+      license-service-1:
+        condition: service_healthy
+      license-service-2:
+        condition: service_healthy
+      license-service-3:
+        condition: service_healthy
+
+volumes:
+  scaling_license_pg_data:

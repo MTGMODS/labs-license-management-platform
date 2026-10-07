@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     INSTANCE_ID: str | None = None
     INITIALIZE_SCHEMA: bool = True
     RUN_EXPIRY_WORKER: bool = True
+    SYNTHETIC_DELAY_MS: int = 0
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
