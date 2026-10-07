@@ -1,0 +1,28 @@
+{{- if .Values.hooks.preUpgradeCheck.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "mtgmods-license.fullname" . }}-pre-upgrade-check
+  labels:
+    {{- include "mtgmods-license.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "-5"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        {{- include "mtgmods-license.componentLabels" (dict "Release" .Release "Chart" .Chart "Values" .Values "component" "pre-upgrade-check") | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: health-check
+          image: curlimages/curl:8.12.1
+          args:
+            - --fail
+            - --silent
+            - --show-error
+            - http://{{ include "mtgmods-license.fullname" . }}:{{ .Values.service.port }}/health
+{{- end }}

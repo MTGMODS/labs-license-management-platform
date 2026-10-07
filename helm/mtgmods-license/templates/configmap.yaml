@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "mtgmods-license.fullname" . }}-config
+  labels:
+    {{- include "mtgmods-license.labels" . | nindent 4 }}
+data:
+  APP_VERSION: {{ .Values.config.appVersion | quote }}
+  API_VERSION: {{ .Values.config.apiVersion | quote }}
+  DEBUG_MODE: {{ .Values.config.debugMode | quote }}
+  REDIS_URL: {{ printf "redis://%s-redis:%v/0" (include "mtgmods-license.fullname" .) .Values.redis.port | quote }}
+  USER_SERVICE_URL: {{ .Values.config.userServiceUrl | quote }}
+  INITIALIZE_SCHEMA: {{ .Values.config.initializeSchema | quote }}
+  RUN_EXPIRY_WORKER: {{ .Values.config.runExpiryWorker | quote }}
+  SYNTHETIC_DELAY_MS: {{ .Values.config.syntheticDelayMs | quote }}

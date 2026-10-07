@@ -1,0 +1,18 @@
+The {{ .Chart.Name }} release {{ .Release.Name }} is installed in namespace {{ .Release.Namespace }}.
+
+{{- if .Values.ingress.enabled }}
+Keep `minikube tunnel` running, then open:
+  http://{{ .Values.ingress.host }}/docs
+
+Without editing the hosts file:
+  curl.exe --resolve "{{ .Values.ingress.host }}:80:127.0.0.1" http://{{ .Values.ingress.host }}/health
+{{- else }}
+Forward the application Service locally:
+  kubectl port-forward -n {{ .Release.Namespace }} service/{{ include "mtgmods-license.fullname" . }} 8080:{{ .Values.service.port }}
+
+Then open:
+  http://127.0.0.1:8080/docs
+{{- end }}
+
+Run the Helm release test:
+  helm test {{ .Release.Name }} -n {{ .Release.Namespace }}

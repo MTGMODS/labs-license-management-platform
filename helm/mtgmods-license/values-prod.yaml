@@ -1,0 +1,19 @@
+replicaCount: 3
+
+image:
+  tag: sha-f83b4c7cf2a84fb90200932522f24aad9ebe31df
+
+config:
+  appVersion: devops-lab4-prod
+
+ingress:
+  enabled: true
+  host: mtgmods-helm.local
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 768Mi

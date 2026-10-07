@@ -194,6 +194,20 @@ See [docs/devops-lab3.md](docs/devops-lab3.md).
 kubectl apply -k k8s
 ```
 
+## Helm packaging lab
+
+DevOps Lab 4 converts the Kubernetes baseline into a reusable Helm chart with
+release-derived names, parameterized dev/prod environments, optional Ingress and
+PVC, shared helpers, install notes, a pre-upgrade health hook and `helm test`.
+The verified release lifecycle is documented in
+[docs/devops-lab4.md](docs/devops-lab4.md), and the values table is in the
+[chart README](helm/mtgmods-license/README.md).
+
+```powershell
+helm lint helm/mtgmods-license
+helm upgrade --install lab-license helm/mtgmods-license -n mtgmods-helm -f helm/mtgmods-license/values-dev.yaml --wait --wait-for-jobs
+```
+
 ## License
 
 MIT — see `LICENSE` in the repository root.

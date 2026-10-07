@@ -1,0 +1,18 @@
+replicaCount: 2
+
+image:
+  tag: sha-805ca0af230d9ece135982527f3c69ba6ca231b0
+
+config:
+  appVersion: devops-lab4-dev
+
+ingress:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 96Mi
+  limits:
+    cpu: 300m
+    memory: 256Mi
