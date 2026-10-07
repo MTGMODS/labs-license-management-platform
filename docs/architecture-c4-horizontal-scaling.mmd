@@ -1,0 +1,33 @@
+flowchart LR
+  Client["Person: API client"]
+
+  subgraph System["MTG MODS · High-load Lab 3"]
+    Gateway["Container: Nginx<br/>single entry point :18100<br/>Round Robin / Least Connections"]
+
+    subgraph Pool["Private upstream pool"]
+      API1["License Service 1<br/>X-Instance-ID"]
+      API2["License Service 2<br/>X-Instance-ID"]
+      API3["License Service 3<br/>optional synthetic delay"]
+    end
+
+    DB[("PostgreSQL<br/>shared business state")]
+    Redis[("Redis<br/>shared cache and lock")]
+  end
+
+  Client -->|HTTP :18100 only| Gateway
+  Gateway -->|private HTTP| API1
+  Gateway -->|private HTTP| API2
+  Gateway -->|private HTTP| API3
+  API1 -->|SQL + readiness SELECT 1| DB
+  API2 -->|SQL + readiness SELECT 1| DB
+  API3 -->|SQL + readiness SELECT 1| DB
+  API1 --> Redis
+  API2 --> Redis
+  API3 --> Redis
+
+  classDef app fill:#e8f1ff,stroke:#2563eb,color:#111827
+  classDef data fill:#ecfdf5,stroke:#059669,color:#111827
+  classDef person fill:#ffffff,stroke:#374151,color:#111827
+  class Client person
+  class Gateway,API1,API2,API3 app
+  class DB,Redis data
