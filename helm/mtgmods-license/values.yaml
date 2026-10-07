@@ -1,0 +1,93 @@
+replicaCount: 2
+
+image:
+  repository: ghcr.io/mtgmods/labs-license-management-platform-license
+  tag: sha-805ca0af230d9ece135982527f3c69ba6ca231b0
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: nginx
+  host: mtgmods.local
+  path: /
+  pathType: Prefix
+
+config:
+  appVersion: devops-lab4-dev
+  apiVersion: v1
+  debugMode: "false"
+  initializeSchema: "false"
+  runExpiryWorker: "false"
+  syntheticDelayMs: "0"
+  userServiceUrl: http://user-service:8000
+
+secrets:
+  create: true
+  existingSecret: ""
+  postgresUser: mtg_license
+  postgresPassword: lab-license-password
+  postgresDatabase: licenses
+  jwtSecret: lab-only-jwt-secret-at-least-32-characters
+  botSecretToken: lab-only-bot-secret
+  internalSecretToken: lab-only-internal-secret
+  rabbitmqUrl: amqp://guest:guest@rabbitmq:5672/
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+probes:
+  readiness:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 2
+    failureThreshold: 6
+  liveness:
+    initialDelaySeconds: 15
+    periodSeconds: 10
+    timeoutSeconds: 2
+
+postgres:
+  replicaCount: 1
+  image: postgres:16-alpine
+  port: 5432
+  persistence:
+    enabled: true
+    size: 1Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+redis:
+  replicaCount: 1
+  image: redis:7.4-alpine
+  port: 6379
+  resources:
+    requests:
+      cpu: 25m
+      memory: 32Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+hooks:
+  preUpgradeCheck:
+    enabled: true
+
+tests:
+  enabled: true

@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "mtgmods-license.fullname" . }}-db-init-{{ .Release.Revision }}
+  labels:
+    {{- include "mtgmods-license.labels" . | nindent 4 }}
+spec:
+  ttlSecondsAfterFinished: 600
+  backoffLimit: 6
+  template:
+    metadata:
+      labels:
+        {{- include "mtgmods-license.componentLabels" (dict "Release" .Release "Chart" .Chart "Values" .Values "component" "db-init") | nindent 8 }}
+    spec:
+      restartPolicy: OnFailure
+      initContainers:
+        - name: wait-for-postgres
+          image: {{ .Values.postgres.image | quote }}
+          command:
+            - sh
+            - -c
+            - until pg_isready -h {{ include "mtgmods-license.fullname" . }}-postgres -U "$POSTGRES_USER" -d "$POSTGRES_DB"; do sleep 2; done
+          envFrom:
+            - secretRef:
+                name: {{ include "mtgmods-license.secretName" . }}
+      containers:
+        - name: schema-init
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["python", "db_init.py"]
+          envFrom:
+            - configMapRef:
+                name: {{ include "mtgmods-license.fullname" . }}-config
+            - secretRef:
+                name: {{ include "mtgmods-license.secretName" . }}

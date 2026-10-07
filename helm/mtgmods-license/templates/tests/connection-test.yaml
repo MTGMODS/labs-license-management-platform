@@ -1,0 +1,21 @@
+{{- if .Values.tests.enabled }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "mtgmods-license.fullname" . }}-test-connection
+  labels:
+    {{- include "mtgmods-license.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  restartPolicy: Never
+  containers:
+    - name: health-check
+      image: curlimages/curl:8.12.1
+      args:
+        - --fail
+        - --silent
+        - --show-error
+        - http://{{ include "mtgmods-license.fullname" . }}:{{ .Values.service.port }}/health
+{{- end }}

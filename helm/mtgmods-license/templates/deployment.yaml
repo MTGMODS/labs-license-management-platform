@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mtgmods-license.fullname" . }}
+  labels:
+    {{- include "mtgmods-license.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      {{- include "mtgmods-license.componentLabels" (dict "Release" .Release "Chart" .Chart "Values" .Values "component" "api") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "mtgmods-license.componentLabels" (dict "Release" .Release "Chart" .Chart "Values" .Values "component" "api") | nindent 8 }}
+    spec:
+      initContainers:
+        - name: wait-for-schema
+          image: {{ .Values.postgres.image | quote }}
+          command:
+            - sh
+            - -c
+            - until PGPASSWORD="$POSTGRES_PASSWORD" psql -h {{ include "mtgmods-license.fullname" . }}-postgres -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c 'SELECT 1 FROM licenses LIMIT 1' >/dev/null 2>&1; do sleep 2; done
+          envFrom:
+            - secretRef:
+                name: {{ include "mtgmods-license.secretName" . }}
+      containers:
+        - name: license-service
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: {{ include "mtgmods-license.fullname" . }}-config
+            - secretRef:
+                name: {{ include "mtgmods-license.secretName" . }}
+          env:
+            - name: INSTANCE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            {{- toYaml .Values.probes.readiness | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            {{- toYaml .Values.probes.liveness | nindent 12 }}
