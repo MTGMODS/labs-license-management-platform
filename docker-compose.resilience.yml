@@ -1,0 +1,29 @@
+name: mtgmods_cache_resilience_lab8
+
+x-resilience: &resilience
+  STATS_CACHE_ENABLED: "true"
+  STATS_CACHE_COALESCE: "${LAB8_PROTECTED:-true}"
+  STATS_CACHE_JITTER_SECONDS: "30"
+  STATS_LAB_GENERATION_DELAY_MS: "2000"
+  STATS_LAB_INSTRUMENT: "true"
+  STATS_CACHE_REDIS_TIMEOUT_SECONDS: "2"
+
+services:
+  cache-tools:
+    environment:
+      LAB8_DEMO: "true"
+  license-service-1:
+    environment:
+      <<: *resilience
+  license-service-2:
+    environment:
+      <<: *resilience
+  license-service-3:
+    environment:
+      <<: *resilience
+  scaling-gateway:
+    ports: !override
+      - "127.0.0.1:18108:8080"
+    volumes: !override
+      - ./deploy/distributed-cache/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./deploy/horizontal-scaling/upstream-round-robin.conf:/etc/nginx/upstream.conf:ro

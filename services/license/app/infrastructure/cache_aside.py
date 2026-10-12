@@ -8,6 +8,9 @@ from dataclasses import dataclass
 from fastapi import BackgroundTasks, HTTPException
 from fastapi.encoders import jsonable_encoder
 from redis.exceptions import RedisError
+from redis.asyncio import Redis
+from redis.asyncio.retry import Retry
+from redis.backoff import NoBackoff
 
 from app.infrastructure.stats_cache import PublicStatsCache, StatsLoader
 
@@ -49,6 +52,14 @@ if redis.call('GET', KEYS[1]) == ARGV[1] then
 end
 return 0
 """
+_STORE_UNPROTECTED = """
+if (redis.call('GET', KEYS[1]) or '0') == ARGV[1]
+   and redis.call('SCARD', KEYS[3]) == 0 then
+    redis.call('SET', KEYS[2], ARGV[2], 'EX', ARGV[3])
+    return 1
+end
+return 0
+"""
 
 
 @dataclass(frozen=True)
@@ -66,6 +77,33 @@ class CacheAsideStats(PublicStatsCache):
         self.writers_key = f"{key}:writers"
         self.ttl = ttl
         self.enabled = enabled
+        self.coalesce = True
+        self.ttl_jitter_seconds = 0
+        self.generation_delay_ms = 0
+        self.instrument = False
+
+    @classmethod
+    def from_url(cls, url, key=STATS_KEY, timeout_seconds=0.5):
+        return cls(Redis.from_url(url, decode_responses=True,
+                                  socket_connect_timeout=timeout_seconds, socket_timeout=timeout_seconds,
+                                  retry=Retry(NoBackoff(), 0)), key)
+
+    def expiration_seconds(self):
+        jitter = max(0, min(self.ttl_jitter_seconds, self.ttl - 1))
+        return self.ttl + secrets.randbelow(2 * jitter + 1) - jitter if jitter else self.ttl
+
+    async def _compute(self, loader: StatsLoader):
+        async def measured_loader():
+            if self.instrument:
+                try:
+                    await self.redis.incr(f"{self.key}:computations")
+                    await self.redis.expire(f"{self.key}:computations", 3600)
+                except RedisError:
+                    logger.warning("Lab computation counter unavailable")
+            if self.generation_delay_ms:
+                await asyncio.sleep(self.generation_delay_ms / 1000)
+            return await loader()
+        return await super()._compute(measured_loader)
 
     async def read(self, loader: StatsLoader) -> CacheResult:
         try:
@@ -94,6 +132,19 @@ class CacheAsideStats(PublicStatsCache):
                     except (ValueError, TypeError):
                         logger.warning("Malformed cache entry: %s", self.key)
                 acquired = await self.redis.set(self.lock_key, token, nx=True, ex=self.LOCK_SECONDS)
+                if not self.coalesce:
+                    # Teaching-only unprotected mode keeps revision/write safety,
+                    # but intentionally does not coordinate concurrent misses.
+                    if acquired:
+                        await self.redis.eval(_UNLOCK, 1, self.lock_key, token)
+                        acquired = False
+                    computed = await self._compute(loader)
+                    stored = await self.redis.eval(
+                        _STORE_UNPROTECTED, 3, self.revision_key, self.key, self.writers_key,
+                        revision, json.dumps(jsonable_encoder(computed), allow_nan=False), self.expiration_seconds(),
+                    )
+                    if stored:
+                        return CacheResult(computed, "MISS")
                 if acquired:
                     # Recheck after acquiring: another owner may have just filled it.
                     revision, raw, writers = await self.redis.eval(_READ, 3, self.revision_key, self.key, self.writers_key)
@@ -110,7 +161,7 @@ class CacheAsideStats(PublicStatsCache):
                     computed = data
                     stored = await self.redis.eval(
                         _STORE, 4, self.lock_key, self.revision_key, self.key, self.writers_key,
-                        token, revision, json.dumps(jsonable_encoder(data), allow_nan=False), self.ttl,
+                        token, revision, json.dumps(jsonable_encoder(data), allow_nan=False), self.expiration_seconds(),
                     )
                     if stored:
                         logger.info("Cache MISS filled: %s revision=%s", self.key, revision)
@@ -118,8 +169,8 @@ class CacheAsideStats(PublicStatsCache):
                     # A write invalidated this calculation or the lease expired.
                     # Do not return/publish the old snapshot; read again.
                     logger.info("Discarded outdated cache calculation: %s", self.key)
-            except RedisError:
-                logger.warning("Redis unavailable: direct DB fallback for %s", self.key)
+            except RedisError as exc:
+                logger.warning("Redis unavailable (%s): direct DB fallback for %s", type(exc).__name__, self.key)
                 return CacheResult(computed if computed is not None else await self._compute(loader), "BYPASS")
             finally:
                 if acquired:
