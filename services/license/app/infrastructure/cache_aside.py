@@ -68,12 +68,20 @@ class CacheAsideStats(PublicStatsCache):
         self.enabled = enabled
 
     async def read(self, loader: StatsLoader) -> CacheResult:
+        try:
+            async with asyncio.timeout(self.GENERATION_TIMEOUT_SECONDS):
+                return await self._read_loop(loader)
+        except TimeoutError as exc:
+            raise HTTPException(503, "Statistics request timed out", headers={"Retry-After": "2"}) from exc
+
+    async def _read_loop(self, loader: StatsLoader) -> CacheResult:
         if not self.enabled:
             return CacheResult(await self._compute(loader), "BYPASS")
         deadline = asyncio.get_running_loop().time() + self.GENERATION_TIMEOUT_SECONDS
         while True:
             token = secrets.token_hex(16)
             acquired = False
+            computed = None
             try:
                 revision, raw, writers = await self.redis.eval(_READ, 3, self.revision_key, self.key, self.writers_key)
                 if writers:
@@ -99,6 +107,7 @@ class CacheAsideStats(PublicStatsCache):
                         except (ValueError, TypeError):
                             pass
                     data = await self._compute(loader)
+                    computed = data
                     stored = await self.redis.eval(
                         _STORE, 4, self.lock_key, self.revision_key, self.key, self.writers_key,
                         token, revision, json.dumps(jsonable_encoder(data), allow_nan=False), self.ttl,
@@ -111,7 +120,7 @@ class CacheAsideStats(PublicStatsCache):
                     logger.info("Discarded outdated cache calculation: %s", self.key)
             except RedisError:
                 logger.warning("Redis unavailable: direct DB fallback for %s", self.key)
-                return CacheResult(await self._compute(loader), "BYPASS")
+                return CacheResult(computed if computed is not None else await self._compute(loader), "BYPASS")
             finally:
                 if acquired:
                     try:

@@ -174,3 +174,39 @@ async def test_redis_down_rejects_mutation_before_db_change(api, cache, componen
     response = await api.post("/api/v1/license/generate", json={})
     assert response.status_code == 503
     assert await db.scalar(select(func.count()).select_from(model)) == 0
+
+
+async def test_failed_publication_does_not_compute_database_twice(cache, monkeypatch):
+    original = cache.redis.eval
+    async def fail_store(script, *args):
+        if "'SET', KEYS[3]" in script:
+            raise ConnectionError("Publication failed")
+        return await original(script, *args)
+    monkeypatch.setattr(cache.redis, "eval", fail_store)
+    loader = AsyncMock(return_value={"total": 12})
+    assert (await cache.read(loader)).source == "BYPASS"
+    loader.assert_awaited_once()
+
+
+async def test_entire_request_deadline_covers_invalidated_retries(cache):
+    from fastapi import HTTPException
+    cache.GENERATION_TIMEOUT_SECONDS = 0.025
+    async def always_invalidated():
+        await cache.invalidate()
+        return {"total": 1}
+    with pytest.raises(HTTPException) as caught:
+        await cache.read(always_invalidated)
+    assert caught.value.status_code == 503
+    assert await cache.redis.get(cache.lock_key) is None
+
+
+async def test_strict_worker_guard_runs_before_schema_or_worker(component, monkeypatch):
+    main = component("app.main")
+    monkeypatch.setattr(main.settings, "STATS_CACHE_ASIDE", True)
+    monkeypatch.setattr(main.settings, "RUN_EXPIRY_WORKER", True)
+    worker = AsyncMock()
+    monkeypatch.setattr(main, "check_expired_licenses_task", worker)
+    with pytest.raises(RuntimeError, match="RUN_EXPIRY_WORKER"):
+        async with main.lifespan(main.app):
+            pass
+    worker.assert_not_awaited()

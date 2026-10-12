@@ -67,11 +67,12 @@ flowchart LR
    Запит повторно читає/обчислює актуальні дані замість публікації старого snapshot.
 
 Інші instances чекають на спільний результат, а не створюють локальні кеші.
-Generation timeout — 90 секунд; lease блокування — 120 секунд.
+Generation і загальний request timeout — 90 секунд; lease блокування — 120 секунд.
 Очікування зайнятого ключа обмежене, після вичерпання повертається 503
-з `Retry-After: 2`. Gateway №3 має власний timeout 30 секунд, тому дуже тривалі
-розрахунки можуть завершитися gateway timeout раніше; поточний dataset
-обчислюється значно швидше. Це явна межа конфігурації, не production SLO.
+з `Retry-After: 2`. Gateway цього стенда має timeout 100 секунд, довший за
+application timeout. Повторні розрахунки через інвалідацію також обмежені
+загальним deadline. Помилка публікації в Redis не запускає вже завершений
+SQL-розрахунок удруге. Це лабораторні межі, не production SLO.
 
 Зняття блокування перевіряє token: старий власник не може видалити lock
 нового worker. У цьому режимі немає SWR чи фонової публікації старих даних.
@@ -258,12 +259,12 @@ docker compose @dc up -d --no-deps license-service-1 license-service-2 license-s
 .\.venv\Scripts\python -m ruff check services/license scripts/highload-lab4 tests/system/test_license_cache.py
 ```
 
-Для Lab 4 додано 12 перевірок: shared HIT без loader, TTL, single-flight,
+Для Lab 4 додано 15 перевірок: shared HIT без loader, TTL, single-flight,
 інвалідація під час розрахунку, dirty marker, кілька writers, fallback,
 disabled cache, malformed JSON, loader error, втрата lease, bounded wait,
 cancellation та HTTP-контракт із реальним записом у тестову SQLite БД.
 Новий файл включений у license job наявного CI.
-Підсумкова локальна перевірка: **146 Python-тестів пройшли**, Ruff і Compose
+Підсумкова локальна перевірка: **149 Python-тестів пройшли**, Ruff і Compose
 config validation також завершилися успішно.
 
 ## Пояснення патернів і меж

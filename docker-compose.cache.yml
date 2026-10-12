@@ -26,7 +26,7 @@ services:
     ports: !override
       - "127.0.0.1:18104:8080"
     volumes: !override
-      - ./deploy/horizontal-scaling/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./deploy/distributed-cache/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./deploy/horizontal-scaling/upstream-round-robin.conf:/etc/nginx/upstream.conf:ro
   cache-tools:
     profiles: [tools]
