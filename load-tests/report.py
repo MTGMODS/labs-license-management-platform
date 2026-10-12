@@ -57,6 +57,10 @@ def generate(directory):
             continue
         datasets.append(data)
         rows = data['summary']['rows']
+        if data['summary'].get('workload') == 'workflow':
+            for row in rows:
+                if row['error_rate'] == 0 and row['requests'] != 5 * row['completed_workflows']:
+                    raise ValueError('Incomplete or semantically invalid workflow despite HTTP 200')
         matrices += [f'## {data["label"]}', '',
                      '| VUs | RPS | Avg ms | p50 ms | p95 ms | p99 ms | Помилки % |',
                      '|---:|---:|---:|---:|---:|---:|---:|']

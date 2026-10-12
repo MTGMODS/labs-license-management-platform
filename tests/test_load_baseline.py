@@ -1,6 +1,7 @@
 """Deterministic tests for baseline analysis, no load against services in CI."""
 import importlib.util
 import json
+import pytest
 from pathlib import Path
 from xml.etree import ElementTree
 
@@ -47,3 +48,11 @@ def test_report_keeps_measured_data_and_generates_passport(tmp_path):
     assert (tmp_path / 'sample.csv').exists()
     assert (tmp_path / 'sample-latency.svg').exists()
     assert json.loads((tmp_path / 'sample.json').read_text()) == source
+
+
+def test_http_success_does_not_hide_invalid_workflows(tmp_path):
+    data = rows()[0]
+    data['completed_workflows'] = 0
+    (tmp_path / 'bad.json').write_text(json.dumps({'label': 'bad', 'summary': {'workload': 'workflow', 'rows': [data]}}))
+    with pytest.raises(ValueError, match='workflow'):
+        module().generate(tmp_path)

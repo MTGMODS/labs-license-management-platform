@@ -58,6 +58,11 @@ jobs:
       - name: Test shared statistics cache and HTTP contract
         if: matrix.component == 'license' || matrix.component == 'usage'
         run: python -m pytest tests/test_public_stats_cache.py tests/test_public_stats_api.py -k '${{ matrix.component }}' -q
+      - name: Validate load-testing tools
+        if: matrix.component == 'license'
+        run: |
+          python -m ruff check load-tests tests/test_load_baseline.py
+          docker run --rm -v "$PWD/load-tests:/tests:ro" grafana/k6:1.0.0 inspect /tests/baseline.js
 
   web:
     name: Web
