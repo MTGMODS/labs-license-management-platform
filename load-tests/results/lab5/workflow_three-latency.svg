@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="320" viewBox="0 0 720 320">
+<rect width="100%" height="100%" fill="white"/>
+<text x="70" y="25" font-family="sans-serif" font-size="16">workflow_three / latency</text>
+<path d="M70,255.0 h610" stroke="#e2e8f0"/>
+<text x="62" y="259.0" text-anchor="end" font-family="sans-serif" font-size="11">0.0</text>
+<path d="M70,202.5 h610" stroke="#e2e8f0"/>
+<text x="62" y="206.5" text-anchor="end" font-family="sans-serif" font-size="11">401.0</text>
+<path d="M70,150.0 h610" stroke="#e2e8f0"/>
+<text x="62" y="154.0" text-anchor="end" font-family="sans-serif" font-size="11">802.0</text>
+<path d="M70,97.5 h610" stroke="#e2e8f0"/>
+<text x="62" y="101.5" text-anchor="end" font-family="sans-serif" font-size="11">1203.0</text>
+<path d="M70,45.0 h610" stroke="#e2e8f0"/>
+<text x="62" y="49.0" text-anchor="end" font-family="sans-serif" font-size="11">1604.0</text>
+<text x="70.0" y="275" text-anchor="middle" font-family="sans-serif" font-size="12">1 VUs</text>
+<text x="192.0" y="275" text-anchor="middle" font-family="sans-serif" font-size="12">10 VUs</text>
+<text x="314.0" y="275" text-anchor="middle" font-family="sans-serif" font-size="12">25 VUs</text>
+<text x="436.0" y="275" text-anchor="middle" font-family="sans-serif" font-size="12">50 VUs</text>
+<text x="558.0" y="275" text-anchor="middle" font-family="sans-serif" font-size="12">100 VUs</text>
+<text x="680.0" y="275" text-anchor="middle" font-family="sans-serif" font-size="12">200 VUs</text>
+<polyline points="70.0,254.06918595642074 192.0,251.85226893153163 314.0,243.94688636163409 436.0,236.27045271944067 558.0,220.46941478459289 680.0,188.4866131682973" fill="none" stroke="#0ea5e9" stroke-width="2"/>
+<text x="70" y="305" fill="#0ea5e9" font-family="sans-serif" font-size="12">avg_ms</text>
+<polyline points="70.0,254.23331818609665 192.0,252.85446531604828 314.0,251.64043476975564 436.0,248.29039402103024 558.0,221.24171296330366 680.0,196.01047686589467" fill="none" stroke="#22c55e" stroke-width="2"/>
+<text x="220" y="305" fill="#22c55e" font-family="sans-serif" font-size="12">p50_ms</text>
+<polyline points="70.0,253.48705351637742 192.0,246.13568664775883 314.0,209.46647884382952 436.0,183.2218850305153 558.0,178.74151131311692 680.0,124.43908006450422" fill="none" stroke="#a855f7" stroke-width="2"/>
+<text x="370" y="305" fill="#a855f7" font-family="sans-serif" font-size="12">p95_ms</text>
+<polyline points="70.0,252.18625988301721 192.0,233.44492014137438 314.0,178.78019580958005 436.0,156.3891206133729 558.0,145.13081452713342 680.0,45.0" fill="none" stroke="#f59e0b" stroke-width="2"/>
+<text x="520" y="305" fill="#f59e0b" font-family="sans-serif" font-size="12">p99_ms</text>
+</svg>

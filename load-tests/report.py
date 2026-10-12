@@ -47,6 +47,8 @@ def svg_chart(rows, metrics, title):
 
 def generate(directory):
     datasets = []
+    matrices = ['# Виміряні метрики лабораторної №5', '',
+                'Warm-up не входить у ці перцентилі. RPS враховує час завершення запитів після ступеня.', '']
     for source in sorted(directory.glob('*.json')):
         if source.name == 'passport.json':
             continue
@@ -55,6 +57,13 @@ def generate(directory):
             continue
         datasets.append(data)
         rows = data['summary']['rows']
+        matrices += [f'## {data["label"]}', '',
+                     '| VUs | RPS | Avg ms | p50 ms | p95 ms | p99 ms | Помилки % |',
+                     '|---:|---:|---:|---:|---:|---:|---:|']
+        for row in rows:
+            matrices.append(f'| {row["vus"]} | {row["rps"]:.2f} | {row["avg_ms"]:.2f} | {row["p50_ms"]:.2f} | {row["p95_ms"]:.2f} | {row["p99_ms"]:.2f} | {row["error_rate"]*100:.2f} |')
+        matrices += ['', f'![Пропускна спроможність]({data["label"]}-throughput.svg)',
+                     f'![Затримки]({data["label"]}-latency.svg)', f'![Помилки]({data["label"]}-errors.svg)', '']
         with (directory / f'{data["label"]}.csv').open('w', newline='', encoding='utf-8') as stream:
             writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
             writer.writeheader()
@@ -78,6 +87,9 @@ def generate(directory):
             'p99_ms': main['stable']['p99_ms'] if main['stable'] else None,
             'error_rate': main['stable']['error_rate'] if main['stable'] else None,
             'saturation_interval_vus': main['saturation_interval_vus'],
+            'critical_scenario': 'Scenario A without cache: repeated public statistics aggregation',
+            'error_rate_at_observed_saturation': next((r['error_rate'] for r in labels['read_three_cached']['summary']['rows']
+                                                     if main['saturation_interval_vus'] and r['vus'] == main['saturation_interval_vus'][1]), None),
             'primary_bottleneck': 'Application CPU; exact hot path requires profiling (Lab 9)',
             'evidence_peak_cpu_pct': labels['read_three_cached'].get('resource_peak_cpu_pct', {})}
     if all(k in labels for k in ['read_three_cached', 'read_one_cached', 'read_three_uncached']):
@@ -91,6 +103,7 @@ def generate(directory):
                                            'caching_ratio': row['rps'] / uncached['rps'],
                                            'cached_p95_ms': row['p95_ms'], 'uncached_p95_ms': uncached['p95_ms']})
     (directory / 'passport.json').write_text(json.dumps(passport, indent=2) + '\n', encoding='utf-8')
+    (directory / 'metrics.md').write_text('\n'.join(matrices) + '\n', encoding='utf-8')
     return passport
 
 

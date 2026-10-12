@@ -45,7 +45,9 @@ def run(label, workload, instances, enabled, levels, seconds, warmup):
                                  else './deploy/horizontal-scaling/upstream-round-robin.conf')
     compose('up', '-d', '--no-deps', '--force-recreate', 'license-service-1', 'license-service-2',
             'license-service-3', env=env)
-    # Keep total SUT resource limits identical; vary only the gateway's active pool.
+    if instances == 1:
+        compose('stop', 'license-service-2', 'license-service-3', env=env)
+    # Same per-instance limits; inactive nodes are actually stopped in the 1-node case.
     time.sleep(3)
     compose('up', '-d', '--no-deps', '--force-recreate', 'scaling-gateway', env=env)
     compose('run', '--rm', '--no-deps', 'cache-tools', 'python', '/load-tests/reset_dataset.py', env=env)
@@ -98,6 +100,8 @@ if __name__ == '__main__':
     parser.add_argument('--warmup-seconds', type=int, default=5)
     parser.add_argument('--smoke', action='store_true')
     parser.add_argument('--only', choices=['read', 'write', 'workflow'])
+    parser.add_argument('--configuration', choices=['read_three_cached', 'write_three', 'workflow_three',
+                                                   'read_one_cached', 'read_three_uncached'])
     parser.add_argument('--output-dir', type=Path)
     args = parser.parse_args()
     try:
@@ -115,6 +119,10 @@ if __name__ == '__main__':
         configurations = configurations[:1]
     if args.only:
         configurations = [c for c in configurations if c[1] == args.only]
+    if args.configuration:
+        configurations = [c for c in configurations if c[0] == args.configuration]
+    if not configurations:
+        parser.error('The selected filters have no configuration')
     if args.output_dir:
         directory = args.output_dir.resolve()
         if not directory.is_relative_to(ROOT / 'load-tests' / 'results'):
