@@ -1,0 +1,50 @@
+name: mtgmods_load_baseline_lab5
+
+services:
+  license-postgres:
+    cpus: 2
+    cpuset: "3-4"
+    mem_limit: 768m
+    command: [postgres, -c, shared_preload_libraries=pg_stat_statements, -c, track_io_timing=on]
+  redis:
+    cpus: 0.5
+    cpuset: "5"
+    mem_limit: 128m
+  license-service-1:
+    cpus: 1
+    cpuset: "0"
+    mem_limit: 512m
+  license-service-2:
+    cpus: 1
+    cpuset: "1"
+    mem_limit: 512m
+  license-service-3:
+    cpus: 1
+    cpuset: "2"
+    mem_limit: 512m
+  scaling-gateway:
+    cpus: 0.5
+    cpuset: "5"
+    mem_limit: 128m
+    ports: !override
+      - "127.0.0.1:18105:8080"
+    volumes: !override
+      - ./deploy/distributed-cache/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ${LAB5_UPSTREAM_CONFIG:-./deploy/horizontal-scaling/upstream-round-robin.conf}:/etc/nginx/upstream.conf:ro
+  cache-tools:
+    environment:
+      LAB5_DEMO: "true"
+    volumes:
+      - ./load-tests:/load-tests:ro
+  k6:
+    profiles: [load]
+    image: grafana/k6:1.0.0
+    user: "0:0"
+    cpus: 2
+    cpuset: "6-7"
+    mem_limit: 1g
+    volumes:
+      - ./load-tests:/tests:ro
+    environment:
+      BASE_URL: http://scaling-gateway:8080
+    command: [run, /tests/baseline.js]
