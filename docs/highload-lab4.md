@@ -34,6 +34,8 @@ Endpoint: `GET /api/v1/license/stats/public`.
 окремий volume PostgreSQL і gateway на `127.0.0.1:18104`.
 Backend і Redis не мають зовнішніх портів. Усі instances мають той самий
 `REDIS_URL`, той самий ключ і повертають `X-Instance-ID`.
+Overlay фіксує Round Robin незалежно від залишеної у shell змінної
+`SCALING_UPSTREAM_CONFIG` із попередньої лабораторної.
 
 Схема: [architecture-c4-distributed-cache.mmd](architecture-c4-distributed-cache.mmd).
 
