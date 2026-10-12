@@ -63,6 +63,7 @@ jobs:
         run: |
           python -m ruff check load-tests tests/test_load_baseline.py
           docker run --rm -v "$PWD/load-tests:/tests:ro" grafana/k6:1.0.0 inspect /tests/baseline.js
+          docker run --rm -v "$PWD/load-tests:/tests:ro" grafana/k6:1.0.0 inspect /tests/stampede.js
 
   web:
     name: Web

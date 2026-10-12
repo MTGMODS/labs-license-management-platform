@@ -210,3 +210,69 @@ async def test_strict_worker_guard_runs_before_schema_or_worker(component, monke
         async with main.lifespan(main.app):
             pass
     worker.assert_not_awaited()
+
+
+async def test_unprotected_misses_reproduce_duplicate_computations(cache):
+    cache.coalesce = False
+    cache.instrument = True
+    async def slow():
+        await asyncio.sleep(0.04)
+        return {"total": 1}
+    loader = AsyncMock(side_effect=slow)
+    results = await asyncio.gather(*(cache.read(loader) for _ in range(12)))
+    assert all(result.source == "MISS" for result in results)
+    assert loader.await_count == 12
+    assert await cache.redis.get(cache.key + ':computations') == '12'
+
+
+async def test_protected_cold_burst_measures_one_computation(cache):
+    cache.instrument = True
+    async def slow():
+        await asyncio.sleep(0.04)
+        return {"total": 1}
+    results = await asyncio.gather(*(cache.read(slow) for _ in range(12)))
+    assert sum(r.source == 'MISS' for r in results) == 1
+    assert await cache.redis.get(cache.key + ':computations') == '1'
+
+
+async def test_jitter_bounds_and_actual_redis_expiration(cache, monkeypatch, component):
+    cache.ttl_jitter_seconds = 30
+    monkeypatch.setattr(component('app.infrastructure.cache_aside').secrets, 'randbelow', lambda _: 0)
+    assert cache.expiration_seconds() == 270
+    await cache.read(AsyncMock(return_value={}))
+    assert 269 <= await cache.redis.ttl(cache.key) <= 270
+    monkeypatch.setattr(component('app.infrastructure.cache_aside').secrets, 'randbelow', lambda n: n-1)
+    assert cache.expiration_seconds() == 330
+
+
+async def test_unprotected_mode_still_fences_invalidated_results(cache):
+    cache.coalesce = False
+    calls = 0
+    async def loader():
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            await cache.invalidate()
+        return {'total': calls}
+    assert (await cache.read(loader)).data == {'total': 2}
+
+
+async def test_instrumentation_failure_does_not_break_fallback(cache, monkeypatch):
+    cache.instrument = True
+    cache.enabled = False
+    monkeypatch.setattr(cache.redis, 'incr', AsyncMock(side_effect=ConnectionError()))
+    loader = AsyncMock(return_value={'total': 1})
+    assert (await cache.read(loader)).data == {'total': 1}
+    loader.assert_awaited_once()
+
+
+async def test_default_and_burst_redis_timeouts_are_explicit(component):
+    cls = component('app.infrastructure.cache_aside').CacheAsideStats
+    normal = cls.from_url('redis://127.0.0.1:1/0')
+    burst = cls.from_url('redis://127.0.0.1:1/0', timeout_seconds=2)
+    try:
+        assert normal.redis.connection_pool.connection_kwargs['socket_timeout'] == .5
+        assert burst.redis.connection_pool.connection_kwargs['socket_timeout'] == 2
+    finally:
+        await normal.aclose()
+        await burst.aclose()
