@@ -109,6 +109,43 @@ async def test_bad_entry_rebuilt_and_loader_error_releases_lock(cache):
     assert await cache.redis.get(cache.lock_key) is None
 
 
+async def test_lost_lease_cannot_publish_or_release_successor(cache):
+    calls = 0
+    async def loader():
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            await cache.redis.set(cache.lock_key, "successor", ex=120)
+            await cache.redis.set(cache.key, json.dumps({"total": 99}), ex=300)
+            return {"total": 1}
+        raise AssertionError("Should reuse successor's result")
+    assert (await cache.read(loader)).data == {"total": 99}
+    assert await cache.redis.get(cache.lock_key) == "successor"
+
+
+async def test_busy_cache_has_bounded_wait_and_cancelled_owner_releases(cache):
+    from fastapi import HTTPException
+    cache.GENERATION_TIMEOUT_SECONDS = 0.01
+    await cache.redis.set(cache.lock_key, "another-owner", ex=120)
+    loader = AsyncMock(return_value={})
+    with pytest.raises(HTTPException) as caught:
+        await cache.read(loader)
+    assert caught.value.status_code == 503
+    loader.assert_not_awaited()
+    await cache.redis.delete(cache.lock_key)
+    cache.GENERATION_TIMEOUT_SECONDS = 90
+    started = asyncio.Event()
+    async def wait():
+        started.set()
+        await asyncio.Event().wait()
+    task = asyncio.create_task(cache.read(wait))
+    await started.wait()
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+    assert await cache.redis.get(cache.lock_key) is None
+
+
 async def test_stats_headers_mutation_and_fresh_read(api, cache, component, monkeypatch):
     service_module = component("app.application.service")
     loader = AsyncMock(return_value={"updated_at": "2026-10-13T00:00:00Z", "total": 1})

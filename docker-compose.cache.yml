@@ -25,3 +25,15 @@ services:
   scaling-gateway:
     ports: !override
       - "127.0.0.1:18104:8080"
+  cache-tools:
+    profiles: [tools]
+    image: mtgmods/lab3-license-service:local
+    env_file:
+      - ./services/license/.env.example
+    environment:
+      <<: *cache-env
+      LAB4_DEMO: "true"
+      PYTHONPATH: /app
+    volumes:
+      - ./scripts/highload-lab4:/lab4:ro
+    command: ["python", "/lab4/seed.py", "--rows", "2000"]
