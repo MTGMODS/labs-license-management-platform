@@ -148,7 +148,8 @@ docker compose @dc run --rm --no-deps cache-tools python /load-tests/ttl_demo.py
 Для повторення оберіть нову директорію результатів. Runner жорстко задає
 Lab 8 project і не приймає довільний URL; k6 звертається тільки до внутрішнього
 gateway. Script сам перемикає protected/unprotected, відновлює synthetic
-dataset, очищає окремий lab Redis і завершує у protected-режимі.
+dataset, очищає окремий lab Redis і відновлює protected-режим через `finally`,
+у тому числі після помилки експерименту.
 
 На захисті демонструються: очищений ключ, один burst у кожному режимі,
 500→1 computations, 5500→11 SQL statements, p95/p99 та різні TTL ключів.

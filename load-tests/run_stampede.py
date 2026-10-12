@@ -60,7 +60,13 @@ if __name__ == '__main__':
         directory = args.output_dir.resolve()
         if not directory.is_relative_to(ROOT / 'load-tests/results') or (directory / 'stampede.json').exists():
             parser.error('Use a new output directory inside load-tests/results')
-    results = [run(False, args.vus), run(True, args.vus)]
+    try:
+        results = [run(False, args.vus), run(True, args.vus)]
+    finally:
+        # Do not leave the demonstration unprotected after an exception/abort.
+        env = dict(os.environ, LAB8_PROTECTED='true')
+        compose('up', '-d', '--no-deps', '--force-recreate', 'license-service-1', 'license-service-2',
+                'license-service-3', 'scaling-gateway', env=env)
     if results[1]['computations'] != 1:
         raise AssertionError('Protected cold burst must compute the aggregate once')
     if results[1]['requests'] != args.vus or results[1]['error_rate'] != 0:
