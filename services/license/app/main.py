@@ -25,6 +25,8 @@ from app.api.bot_routes import router as bot_routes
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    if settings.STATS_CACHE_ASIDE and settings.RUN_EXPIRY_WORKER:
+        raise RuntimeError("Lab 4 strict cache requires RUN_EXPIRY_WORKER=false; HTTP mutations own invalidation")
     if settings.INITIALIZE_SCHEMA:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
@@ -34,8 +36,6 @@ async def lifespan(app: FastAPI):
         expiry_task = asyncio.create_task(check_expired_licenses_task())
 
     if settings.STATS_CACHE_ASIDE:
-        if settings.RUN_EXPIRY_WORKER:
-            raise RuntimeError("Lab 4 strict cache requires RUN_EXPIRY_WORKER=false; HTTP mutations own invalidation")
         cache = CacheAsideStats.from_url(settings.REDIS_URL, STATS_KEY)
         cache.ttl = max(1, settings.STATS_CACHE_TTL_SECONDS)
         cache.enabled = settings.STATS_CACHE_ENABLED
