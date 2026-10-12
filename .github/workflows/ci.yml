@@ -22,7 +22,7 @@ jobs:
             tests: tests/system/test_user.py
           - component: license
             path: services/license
-            tests: tests/system/test_license.py tests/system/test_expiry_worker.py tests/system/test_license_cache.py
+            tests: tests/system/test_license.py tests/system/test_expiry_worker.py tests/system/test_license_cache.py tests/test_load_baseline.py
           - component: usage
             path: services/usage
             tests: tests/system/test_usage.py
