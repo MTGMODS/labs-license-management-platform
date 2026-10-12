@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import socket
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
@@ -8,6 +9,9 @@ from sqlalchemy import text
 from app.shared.database import engine, Base
 from app.shared.config import settings
 from app.infrastructure.stats_cache import PublicStatsCache
+from app.infrastructure.cache_aside import CacheAsideStats, STATS_KEY
+from redis.exceptions import RedisError
+from fastapi.responses import JSONResponse
 from app.shared import datetime_utils as _datetime_utils  # noqa: F401 - register UTC JSON encoder
 from app.shared.exceptions import DomainException, global_exception_handler, validation_exception_handler
 from app.application.worker import check_expired_licenses_task
@@ -21,6 +25,8 @@ from app.api.bot_routes import router as bot_routes
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    if settings.STATS_CACHE_ASIDE and settings.RUN_EXPIRY_WORKER:
+        raise RuntimeError("Lab 4 strict cache requires RUN_EXPIRY_WORKER=false; HTTP mutations own invalidation")
     if settings.INITIALIZE_SCHEMA:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
@@ -29,9 +35,13 @@ async def lifespan(app: FastAPI):
     if settings.RUN_EXPIRY_WORKER:
         expiry_task = asyncio.create_task(check_expired_licenses_task())
 
-    app.state.public_stats_cache = PublicStatsCache.from_url(
-        settings.REDIS_URL, "mtgmods:license:public_stats:v1",
-    )
+    if settings.STATS_CACHE_ASIDE:
+        cache = CacheAsideStats.from_url(settings.REDIS_URL, STATS_KEY)
+        cache.ttl = max(1, settings.STATS_CACHE_TTL_SECONDS)
+        cache.enabled = settings.STATS_CACHE_ENABLED
+    else:
+        cache = PublicStatsCache.from_url(settings.REDIS_URL, "mtgmods:license:public_stats:v1")
+    app.state.public_stats_cache = cache
     try:
         yield
     finally:
@@ -67,7 +77,38 @@ async def add_instance_id_header(request, call_next):
     delay_ms = max(0, settings.SYNTHETIC_DELAY_MS)
     if delay_ms:
         await asyncio.sleep(delay_ms / 1000)
-    response = await call_next(request)
+    cache = getattr(app.state, "public_stats_cache", None)
+    mutation = (
+        isinstance(cache, CacheAsideStats)
+        and request.method in {"POST", "PUT", "PATCH", "DELETE"}
+        and request.url.path.startswith("/api/v1/license/")
+    )
+    token = None
+    if mutation:
+        try:
+            token = await cache.begin_write()
+        except RedisError:
+            response = JSONResponse(
+                status_code=503,
+                content={"detail": "Redis unavailable: mutation not started; statistics remain readable"},
+            )
+            response.headers["X-Instance-ID"] = INSTANCE_ID
+            response.headers["X-Cache-Invalidation"] = "UNAVAILABLE"
+            return response
+    try:
+        response = await call_next(request)
+    finally:
+        invalidated = False
+        if token is not None:
+            try:
+                await cache.end_write(token)
+                invalidated = True
+            except RedisError:
+                # Marker intentionally stays present. Recovery reads bypass
+                # Redis until an operator clears it with writers quiesced.
+                logging.getLogger(__name__).warning("Mutation completed but dirty marker retained")
+    if mutation:
+        response.headers["X-Cache-Invalidation"] = "INVALIDATED" if invalidated else "DIRTY"
     response.headers["X-Instance-ID"] = INSTANCE_ID
     response.headers["X-Instance-Delay-Ms"] = str(delay_ms)
     return response
