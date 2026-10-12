@@ -1,0 +1,19 @@
+flowchart LR
+    client["Клієнт / verify.py"]
+    gateway["Nginx · 127.0.0.1:18104"]
+    subgraph app["Stateless application layer"]
+        a["License Service 1"]
+        b["License Service 2"]
+        c["License Service 3"]
+    end
+    redis[("Redis · спільний JSON / TTL / revision / writers / lock")]
+    db[("PostgreSQL · licenses / transaction_purchases")]
+    init["Одноразова ініціалізація схеми"]
+    seed["cache-tools · синтетичний dataset"]
+    client -->|HTTP GET / POST / PATCH / DELETE| gateway
+    gateway -->|HTTP Round Robin| a & b & c
+    a & b & c -->|RESP · GET / SET / Lua| redis
+    a & b & c -->|SQL · MISS / BYPASS / mutations| db
+    init -->|DDL| db
+    seed -->|Спільний write marker| redis
+    seed -->|SQL · лише лабова БД| db

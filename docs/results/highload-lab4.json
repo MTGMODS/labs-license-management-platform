@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-13",
+  "environment": {
+    "host": "Windows, Docker Desktop Linux containers",
+    "docker_engine": "29.2.1",
+    "logical_cpus": 12,
+    "docker_memory_bytes": 16726044672,
+    "per_container_resource_limits": "none",
+    "instances": 3,
+    "postgres": "16-alpine",
+    "redis": "7.4-alpine",
+    "nginx": "1.27-alpine",
+    "synthetic_licenses": 2000,
+    "synthetic_purchases": 2000,
+    "cached_json_bytes": 330168,
+    "isolation": "dedicated Compose project, local functional verification; not a saturation benchmark"
+  },
+  "project": "mtgmods_distributed_cache_lab4",
+  "base_url": "http://127.0.0.1:18104",
+  "checks": {
+    "cold": {"code": 200, "cache": "MISS", "instance": "license-service-3", "ms": 182.963},
+    "hot_cross_instance": {"code": 200, "cache": "HIT", "instance": "license-service-1", "ms": 33.067},
+    "after_create_activate": {"code": 200, "cache": "MISS", "instance": "license-service-2", "ms": 132.255},
+    "after_patch": {"code": 200, "cache": "MISS", "instance": "license-service-2", "ms": 129.235},
+    "after_delete": {"code": 200, "cache": "MISS", "instance": "license-service-1", "ms": 124.852},
+    "expired": {"code": 200, "cache": "MISS", "instance": "license-service-2", "ms": 131.473},
+    "redis_down": {"code": 200, "cache": "BYPASS", "instance": "license-service-3", "ms": 608.361},
+    "write_while_redis_down": {"code": 503, "invalidation": "UNAVAILABLE", "instance": "license-service-1", "ms": 503.986},
+    "recovered": {"code": 200, "cache": "MISS", "instance": "license-service-2", "ms": 120.097}
+  },
+  "timings": {
+    "samples_per_mode": 10,
+    "cold_ms": [138.428, 147.114, 131.015, 138.982, 137.949, 116.011, 150.993, 154.066, 132.088, 220.893],
+    "hot_ms": [48.162, 61.572, 33.908, 33.595, 54.554, 87.518, 70.854, 33.688, 53.271, 60.568],
+    "cold_median_ms": 138.705,
+    "hot_median_ms": 53.913
+  }
+}

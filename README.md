@@ -181,6 +181,25 @@ results. See [docs/highload-lab3.md](docs/highload-lab3.md).
 docker compose -f docker-compose.scaling.yml up --build -d
 ```
 
+## Розподілене кешування ІВСАВПЗ №4
+
+На основі горизонтального масштабування реалізовано окремий строгий Cache-Aside
+режим License Service: спільний Redis, TTL, заголовки HIT/MISS/BYPASS,
+revision-fenced інвалідація після HTTP-мутацій і fallback читання до PostgreSQL.
+Звіт за пунктами, C4-схема, політика ключів, вимірювання cold/hot, компроміси
+консистентності та сценарії відновлення: [docs/highload-lab4.md](docs/highload-lab4.md).
+
+```powershell
+$dc = @('-f', 'docker-compose.scaling.yml', '-f', 'docker-compose.cache.yml')
+docker compose @dc up --build -d
+docker compose @dc run --rm --no-deps cache-tools
+python scripts/highload-lab4/verify.py --samples 10
+```
+
+Gateway цього ізольованого стенда — `http://127.0.0.1:18104`.
+Недоступний Redis не блокує статистику; строгі записи до його відновлення
+отримують 503 до зміни БД. Боти та production `.env` для демонстрації не потрібні.
+
 ## Лабораторна робота з оркестрації Kubernetes
 
 У лабораторній роботі №3 два екземпляри License Service, PostgreSQL і Redis
