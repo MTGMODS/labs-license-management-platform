@@ -100,6 +100,14 @@ if __name__ == '__main__':
     parser.add_argument('--only', choices=['read', 'write', 'workflow'])
     parser.add_argument('--output-dir', type=Path)
     args = parser.parse_args()
+    try:
+        vus = [int(value) for value in args.levels.split(',')]
+    except ValueError:
+        parser.error('levels must be comma-separated integers')
+    if not vus or any(v < 1 or v > 2000 for v in vus) or vus != sorted(set(vus)):
+        parser.error('levels must be unique ascending VUs between 1 and 2000')
+    if args.stage_seconds < 1 or args.warmup_seconds < 1:
+        parser.error('stage and warmup durations must be positive')
     configurations = [('read_three_cached', 'read', 3, True), ('write_three', 'write', 3, True),
                       ('workflow_three', 'workflow', 3, True), ('read_one_cached', 'read', 1, True),
                       ('read_three_uncached', 'read', 3, False)]
@@ -107,6 +115,12 @@ if __name__ == '__main__':
         configurations = configurations[:1]
     if args.only:
         configurations = [c for c in configurations if c[1] == args.only]
+    if args.output_dir:
+        directory = args.output_dir.resolve()
+        if not directory.is_relative_to(ROOT / 'load-tests' / 'results'):
+            parser.error('Output must be inside load-tests/results')
+        if any((directory / f'{c[0]}.json').exists() for c in configurations):
+            parser.error('Results already exist; choose a new output directory')
     for label, workload, instances, enabled in configurations:
         print('RUN ' + label, flush=True)
         result = run(label, workload, instances, enabled, args.levels, args.stage_seconds, args.warmup_seconds)

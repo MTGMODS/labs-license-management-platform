@@ -10,7 +10,8 @@ if (!['read', 'write', 'workflow'].includes(WORKLOAD)) throw new Error('Invalid 
 const LEVELS = (__ENV.LEVELS || '1,10,25,50,100,200').split(',').map(Number);
 const DURATION = Number(__ENV.STAGE_SECONDS || 8);
 const WARMUP = Number(__ENV.WARMUP_SECONDS || 5);
-if (LEVELS.some(v => !Number.isInteger(v) || v < 1 || v > 2000) || DURATION < 1) throw new Error('Invalid load profile');
+if (LEVELS.some((v, i) => !Number.isInteger(v) || v < 1 || v > 2000 || (i > 0 && v <= LEVELS[i-1]))
+    || DURATION < 1 || WARMUP < 1) throw new Error('Invalid load profile');
 const requests = new Counter('business_requests');
 const latency = new Trend('business_latency', true);
 const errors = new Rate('business_errors');

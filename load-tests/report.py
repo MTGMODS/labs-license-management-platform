@@ -68,6 +68,18 @@ def generate(directory):
     passport = {'date': '2026-10-13', 'scope': 'local controlled laboratory baseline, not production capacity',
                 'profiles': {data['label']: classify(data['summary']['rows']) for data in datasets}}
     labels = {d['label']: d for d in datasets}
+    if 'read_three_cached' in labels:
+        main = passport['profiles']['read_three_cached']
+        passport['system_performance_baseline'] = {
+            'primary_workload': 'Scenario A: public statistics, three instances, warm Redis',
+            'environment': '12 logical CPU / 16726044672 bytes Docker RAM; per-instance 1 CPU/512MiB; DB 2 CPU/768MiB',
+            'stable_throughput_rps': main['stable']['rps'] if main['stable'] else None,
+            'p95_ms': main['stable']['p95_ms'] if main['stable'] else None,
+            'p99_ms': main['stable']['p99_ms'] if main['stable'] else None,
+            'error_rate': main['stable']['error_rate'] if main['stable'] else None,
+            'saturation_interval_vus': main['saturation_interval_vus'],
+            'primary_bottleneck': 'Application CPU; exact hot path requires profiling (Lab 9)',
+            'evidence_peak_cpu_pct': labels['read_three_cached'].get('resource_peak_cpu_pct', {})}
     if all(k in labels for k in ['read_three_cached', 'read_one_cached', 'read_three_uncached']):
         passport['comparisons'] = []
         for row, one, uncached in zip(labels['read_three_cached']['summary']['rows'],
