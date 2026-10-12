@@ -1,0 +1,27 @@
+# Overlay for the isolated Lab 3 stack, not the production compose.
+name: mtgmods_distributed_cache_lab4
+
+x-cache-env: &cache-env
+  INITIALIZE_SCHEMA: "false"
+  RUN_EXPIRY_WORKER: "false"
+  STATS_CACHE_ASIDE: "true"
+  STATS_CACHE_ENABLED: "${LAB4_CACHE_ENABLED:-true}"
+  STATS_CACHE_TTL_SECONDS: "${LAB4_CACHE_TTL_SECONDS:-300}"
+  SYNTHETIC_DELAY_MS: "0"
+
+services:
+  license-service-1:
+    environment:
+      <<: *cache-env
+      INSTANCE_ID: license-service-1
+  license-service-2:
+    environment:
+      <<: *cache-env
+      INSTANCE_ID: license-service-2
+  license-service-3:
+    environment:
+      <<: *cache-env
+      INSTANCE_ID: license-service-3
+  scaling-gateway:
+    ports: !override
+      - "127.0.0.1:18104:8080"

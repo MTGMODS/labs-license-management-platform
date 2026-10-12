@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     INITIALIZE_SCHEMA: bool = True
     RUN_EXPIRY_WORKER: bool = True
     SYNTHETIC_DELAY_MS: int = 0
+    STATS_CACHE_ASIDE: bool = False
+    STATS_CACHE_TTL_SECONDS: int = 300
+    STATS_CACHE_ENABLED: bool = True
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
