@@ -200,6 +200,25 @@ Gateway цього ізольованого стенда — `http://127.0.0.1:1
 Недоступний Redis не блокує статистику; строгі записи до його відновлення
 отримують 503 до зміни БД. Боти та production `.env` для демонстрації не потрібні.
 
+## Навантажувальний baseline ІВСАВПЗ №5
+
+Три бізнес-сценарії k6, warm-up і ступені до 200 VUs, ізольовані CPU sets,
+фіксовані ресурси, actual 1 vs 3 API instances, cache enabled vs disabled,
+SQL/resource метрики, таблиці, графіки та System Performance Baseline.
+Звіт і команди: [docs/highload-lab5.md](docs/highload-lab5.md).
+Вимірювання: [load-tests/results/lab5/metrics.md](load-tests/results/lab5/metrics.md).
+
+```powershell
+$dc = @('-f', 'docker-compose.scaling.yml', '-f', 'docker-compose.cache.yml', '-f', 'docker-compose.load.yml')
+docker compose @dc up --build -d
+python load-tests/run_baseline.py --output-dir load-tests/results/my-run
+python load-tests/report.py load-tests/results/my-run
+```
+
+Порт стенда — 18105. Потрібно 8+ logical CPU у Docker. Runner працює лише
+з окремою synthetic DB і не приймає production URL; повторні прогони
+зберігаються у нових директоріях результатів.
+
 ## Лабораторна робота з оркестрації Kubernetes
 
 У лабораторній роботі №3 два екземпляри License Service, PostgreSQL і Redis

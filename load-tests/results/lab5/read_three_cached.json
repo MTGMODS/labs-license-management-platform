@@ -1,0 +1,1583 @@
+{
+  "label": "read_three_cached",
+  "instances": 3,
+  "cache_enabled": true,
+  "summary": {
+    "workload": "read",
+    "stage_seconds": 8,
+    "warmup_seconds": 5,
+    "rows": [
+      {
+        "vus": 1,
+        "requests": 257,
+        "observed_seconds": 8.008,
+        "rps": 32.0929070929071,
+        "avg_ms": 30.848004019455253,
+        "p50_ms": 27.673222,
+        "p95_ms": 50.03239719999999,
+        "p99_ms": 61.62433064,
+        "error_rate": 0,
+        "completed_workflows": 0
+      },
+      {
+        "vus": 10,
+        "requests": 675,
+        "observed_seconds": 8.311,
+        "rps": 81.21766333774515,
+        "avg_ms": 120.82766452148132,
+        "p50_ms": 101.270956,
+        "p95_ms": 247.61725519999993,
+        "p99_ms": 367.70507967999976,
+        "error_rate": 0,
+        "completed_workflows": 0
+      },
+      {
+        "vus": 25,
+        "requests": 670,
+        "observed_seconds": 8.356,
+        "rps": 80.18190521780757,
+        "avg_ms": 304.1384083746268,
+        "p50_ms": 273.4146,
+        "p95_ms": 549.0566526499998,
+        "p99_ms": 671.3449789599995,
+        "error_rate": 0,
+        "completed_workflows": 0
+      },
+      {
+        "vus": 50,
+        "requests": 637,
+        "observed_seconds": 8.652,
+        "rps": 73.62459546925567,
+        "avg_ms": 648.0292246562019,
+        "p50_ms": 607.552163,
+        "p95_ms": 1034.7139408,
+        "p99_ms": 1112.24127284,
+        "error_rate": 0,
+        "completed_workflows": 0
+      },
+      {
+        "vus": 100,
+        "requests": 752,
+        "observed_seconds": 9.282,
+        "rps": 81.01702219349278,
+        "avg_ms": 1135.9136191023933,
+        "p50_ms": 1151.9046349999999,
+        "p95_ms": 1553.5770020999996,
+        "p99_ms": 1741.88911611,
+        "error_rate": 0,
+        "completed_workflows": 0
+      },
+      {
+        "vus": 200,
+        "requests": 832,
+        "observed_seconds": 10.503,
+        "rps": 79.21546224888127,
+        "avg_ms": 2226.045480469952,
+        "p50_ms": 2354.758599,
+        "p95_ms": 2846.0177465499996,
+        "p99_ms": 2977.07504146,
+        "error_rate": 0,
+        "completed_workflows": 0
+      }
+    ],
+    "cache_hits": 3960,
+    "cache_misses": 1,
+    "cache_bypass": 0
+  },
+  "dataset_initial_licenses": 2000,
+  "connection_pool_per_instance": {
+    "pool_size": 5,
+    "max_overflow": 10,
+    "pool_timeout_seconds": 30.0
+  },
+  "resource_peak_cpu_pct": {
+    "scaling-gateway-1": 16.23,
+    "license-service-1-1": 100.8,
+    "license-service-3-1": 102.19,
+    "license-service-2-1": 101.98,
+    "license-postgres-1": 3.94,
+    "redis-1": 9.82,
+    "k6": 15.95
+  },
+  "database": {
+    "calls": 202,
+    "execution_ms": 16.514026
+  },
+  "resources": [
+    {
+      "elapsed_s": 2.26,
+      "containers": [
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 5.56,
+          "memory": "2.133MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 31.67,
+          "memory": "74.09MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 33.8,
+          "memory": "73.73MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 28.26,
+          "memory": "75.28MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 2.93,
+          "memory": "45.52MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 5.3,
+          "memory": "4.953MiB / 128MiB"
+        },
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 5.23,
+          "memory": "48.62MiB / 1GiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 5.55,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 4.83,
+          "memory": "49.93MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 4.69,
+          "memory": "2.137MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 50.28,
+          "memory": "87.38MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 29.12,
+          "memory": "73.8MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 33.88,
+          "memory": "75.98MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.62,
+          "memory": "45.29MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 2.43,
+          "memory": "4.953MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 8.61,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 0.43,
+          "memory": "50.37MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 0.0,
+          "memory": "2.129MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 0.11,
+          "memory": "74.1MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 0.11,
+          "memory": "73.81MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 0.09,
+          "memory": "75.78MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.01,
+          "memory": "45.29MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 0.3,
+          "memory": "5.008MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 11.94,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 0.42,
+          "memory": "50.78MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 0.0,
+          "memory": "2.129MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 0.1,
+          "memory": "74.1MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 0.11,
+          "memory": "73.81MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 0.09,
+          "memory": "75.78MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 3.18,
+          "memory": "45.29MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 2.58,
+          "memory": "4.738MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 15.22,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 0.44,
+          "memory": "51.17MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 0.0,
+          "memory": "2.129MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 27.0,
+          "memory": "87.37MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 32.89,
+          "memory": "73.82MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 31.45,
+          "memory": "75.78MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.08,
+          "memory": "45.29MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 0.32,
+          "memory": "4.988MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 18.28,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 5.49,
+          "memory": "53.6MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 5.77,
+          "memory": "2.141MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 30.99,
+          "memory": "74.11MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 31.05,
+          "memory": "73.93MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 29.93,
+          "memory": "75.78MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.03,
+          "memory": "45.29MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 3.03,
+          "memory": "4.801MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 21.55,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 5.69,
+          "memory": "58.51MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 5.84,
+          "memory": "2.387MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 32.61,
+          "memory": "74.22MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 32.07,
+          "memory": "73.97MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 31.13,
+          "memory": "75.79MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.04,
+          "memory": "45.3MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 3.2,
+          "memory": "4.664MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 24.83,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 1.56,
+          "memory": "62.49MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 1.24,
+          "memory": "2.137MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 33.23,
+          "memory": "74.13MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 7.27,
+          "memory": "74.02MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 7.71,
+          "memory": "75.79MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.01,
+          "memory": "45.29MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 0.82,
+          "memory": "4.973MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 27.89,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 3.01,
+          "memory": "63.43MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 0.0,
+          "memory": "2.137MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 0.1,
+          "memory": "74.14MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 0.08,
+          "memory": "74.02MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 0.11,
+          "memory": "75.79MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 3.94,
+          "memory": "45.11MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 2.46,
+          "memory": "5.223MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 31.16,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 0.36,
+          "memory": "63.56MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 0.0,
+          "memory": "2.137MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 24.17,
+          "memory": "74.14MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 24.23,
+          "memory": "74.02MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 0.13,
+          "memory": "75.79MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.09,
+          "memory": "45.11MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 0.3,
+          "memory": "4.973MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 34.41,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 5.55,
+          "memory": "63.89MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 0.0,
+          "memory": "2.137MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 40.76,
+          "memory": "75.23MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 40.33,
+          "memory": "75.34MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 39.8,
+          "memory": "76.71MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.01,
+          "memory": "45.11MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 3.63,
+          "memory": "6.062MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 37.48,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 11.78,
+          "memory": "66.79MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 12.26,
+          "memory": "2.906MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 98.67,
+          "memory": "76.61MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 97.92,
+          "memory": "76.3MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 100.51,
+          "memory": "77.82MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 3.35,
+          "memory": "45.29MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 9.3,
+          "memory": "6.547MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 40.76,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 15.95,
+          "memory": "67.52MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 12.1,
+          "memory": "2.469MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 93.85,
+          "memory": "76.1MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 97.32,
+          "memory": "75.6MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 100.61,
+          "memory": "78.08MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.01,
+          "memory": "45.29MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 7.68,
+          "memory": "6.594MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 44.03,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 1.69,
+          "memory": "67.53MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 0.0,
+          "memory": "2.238MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 0.1,
+          "memory": "75.03MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 0.1,
+          "memory": "75.6MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 0.1,
+          "memory": "77.25MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.01,
+          "memory": "45.3MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 0.3,
+          "memory": "5.562MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 47.11,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 0.34,
+          "memory": "67.53MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 0.0,
+          "memory": "2.238MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 0.1,
+          "memory": "75.03MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 0.1,
+          "memory": "75.6MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 0.11,
+          "memory": "77.25MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.01,
+          "memory": "45.45MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 0.34,
+          "memory": "5.562MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 50.36,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 0.3,
+          "memory": "67.53MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 0.0,
+          "memory": "2.238MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 0.11,
+          "memory": "75.03MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 0.11,
+          "memory": "75.6MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 0.09,
+          "memory": "77.25MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.0,
+          "memory": "45.45MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 0.32,
+          "memory": "5.812MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 53.62,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 8.83,
+          "memory": "67.71MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 10.73,
+          "memory": "2.859MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 98.88,
+          "memory": "77.77MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 98.18,
+          "memory": "78.2MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 98.2,
+          "memory": "79.64MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.08,
+          "memory": "45.45MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 7.44,
+          "memory": "7.285MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 56.92,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 11.95,
+          "memory": "68.1MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 12.27,
+          "memory": "2.996MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 97.93,
+          "memory": "78.55MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 98.33,
+          "memory": "77.68MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 98.05,
+          "memory": "79.46MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.09,
+          "memory": "45.53MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 7.26,
+          "memory": "7.004MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 60.2,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 13.87,
+          "memory": "68.17MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 10.22,
+          "memory": "3.016MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 91.0,
+          "memory": "77.98MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 87.42,
+          "memory": "77.57MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 100.3,
+          "memory": "79.46MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.13,
+          "memory": "45.53MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 6.76,
+          "memory": "7.004MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 63.47,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 0.4,
+          "memory": "68.2MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 0.0,
+          "memory": "2.484MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 0.08,
+          "memory": "77.82MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 0.08,
+          "memory": "77.57MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 0.11,
+          "memory": "76.27MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 1.81,
+          "memory": "45.54MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 1.77,
+          "memory": "4.957MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 66.55,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 0.36,
+          "memory": "68.2MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 0.0,
+          "memory": "2.484MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 0.09,
+          "memory": "77.82MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 0.1,
+          "memory": "77.57MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 0.11,
+          "memory": "76.27MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.1,
+          "memory": "45.55MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 0.32,
+          "memory": "4.953MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 69.8,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 0.41,
+          "memory": "68.21MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 0.0,
+          "memory": "2.484MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 24.19,
+          "memory": "77.82MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 25.96,
+          "memory": "77.7MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 0.14,
+          "memory": "76.27MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.16,
+          "memory": "45.57MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 0.36,
+          "memory": "5.203MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 73.09,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 11.01,
+          "memory": "68.69MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 14.84,
+          "memory": "3.648MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 99.81,
+          "memory": "79.46MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 100.2,
+          "memory": "78.62MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 99.89,
+          "memory": "79.14MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 3.31,
+          "memory": "45.58MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 9.82,
+          "memory": "5.914MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 76.39,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 10.83,
+          "memory": "68.99MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 11.21,
+          "memory": "3.992MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 100.6,
+          "memory": "89.97MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 98.76,
+          "memory": "78.62MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 98.75,
+          "memory": "79.21MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.15,
+          "memory": "45.57MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 6.86,
+          "memory": "5.918MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 79.69,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 0.41,
+          "memory": "69MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 0.0,
+          "memory": "2.984MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 0.1,
+          "memory": "77.08MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 0.09,
+          "memory": "76.31MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 0.1,
+          "memory": "76.57MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.07,
+          "memory": "45.57MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 0.3,
+          "memory": "5.668MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 82.97,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 0.37,
+          "memory": "68.99MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 0.0,
+          "memory": "2.984MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 0.11,
+          "memory": "77.08MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 0.1,
+          "memory": "76.31MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 0.09,
+          "memory": "76.53MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.15,
+          "memory": "45.58MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 2.36,
+          "memory": "4.242MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 86.23,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 0.38,
+          "memory": "68.99MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 0.0,
+          "memory": "2.984MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 0.11,
+          "memory": "77.08MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 0.1,
+          "memory": "76.31MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 0.09,
+          "memory": "76.54MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.07,
+          "memory": "45.83MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 0.31,
+          "memory": "4.238MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 89.5,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 6.87,
+          "memory": "70.36MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 16.23,
+          "memory": "4.988MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 100.09,
+          "memory": "79.02MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 99.78,
+          "memory": "78.73MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 99.96,
+          "memory": "92.56MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.04,
+          "memory": "46MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 7.51,
+          "memory": "8.477MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 92.8,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 10.48,
+          "memory": "74.84MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 15.03,
+          "memory": "5.008MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 100.3,
+          "memory": "79.58MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 100.64,
+          "memory": "92.03MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 100.19,
+          "memory": "79.63MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.07,
+          "memory": "46.03MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 6.64,
+          "memory": "8.641MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 96.11,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 10.01,
+          "memory": "74.98MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 12.98,
+          "memory": "5.387MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 100.8,
+          "memory": "79.42MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 100.48,
+          "memory": "78.57MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 99.98,
+          "memory": "80.18MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.04,
+          "memory": "46MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 7.69,
+          "memory": "8.512MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 99.38,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 0.41,
+          "memory": "80.53MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 0.01,
+          "memory": "3.797MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 0.11,
+          "memory": "78.93MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 0.08,
+          "memory": "77.76MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 0.1,
+          "memory": "77.77MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.0,
+          "memory": "46MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 0.32,
+          "memory": "5.77MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 102.64,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 0.4,
+          "memory": "80.91MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 0.0,
+          "memory": "3.777MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 0.11,
+          "memory": "78.93MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 0.09,
+          "memory": "77.75MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 0.11,
+          "memory": "77.77MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.0,
+          "memory": "46MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 0.32,
+          "memory": "5.77MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 105.94,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 0.44,
+          "memory": "81.93MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 0.0,
+          "memory": "3.777MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 0.12,
+          "memory": "78.93MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 0.1,
+          "memory": "77.76MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 0.09,
+          "memory": "77.77MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.53,
+          "memory": "46MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 0.31,
+          "memory": "6.02MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 109.01,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 10.97,
+          "memory": "92.58MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 10.9,
+          "memory": "7.023MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 99.92,
+          "memory": "93.23MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 100.2,
+          "memory": "93.02MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 100.37,
+          "memory": "80.4MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 3.01,
+          "memory": "46MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 8.79,
+          "memory": "7.398MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 112.3,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 13.05,
+          "memory": "92.5MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 12.1,
+          "memory": "7.172MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 99.41,
+          "memory": "80.37MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 100.42,
+          "memory": "79.89MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 100.32,
+          "memory": "80.4MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.0,
+          "memory": "46MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 8.09,
+          "memory": "7.398MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 115.56,
+      "containers": [
+        {
+          "name": "k6-run-cc2c25691814",
+          "cpu_pct": 8.32,
+          "memory": "92.59MiB / 1GiB"
+        },
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 6.98,
+          "memory": "6.742MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 100.75,
+          "memory": "80.36MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 102.19,
+          "memory": "93.12MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 101.98,
+          "memory": "79.66MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 0.04,
+          "memory": "46.01MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 6.74,
+          "memory": "7.48MiB / 128MiB"
+        }
+      ]
+    },
+    {
+      "elapsed_s": 118.64,
+      "containers": [
+        {
+          "name": "scaling-gateway-1",
+          "cpu_pct": 0.0,
+          "memory": "3.598MiB / 128MiB"
+        },
+        {
+          "name": "license-service-1-1",
+          "cpu_pct": 0.1,
+          "memory": "78.16MiB / 512MiB"
+        },
+        {
+          "name": "license-service-3-1",
+          "cpu_pct": 0.08,
+          "memory": "78.19MiB / 512MiB"
+        },
+        {
+          "name": "license-service-2-1",
+          "cpu_pct": 0.11,
+          "memory": "79.16MiB / 512MiB"
+        },
+        {
+          "name": "license-postgres-1",
+          "cpu_pct": 3.03,
+          "memory": "46MiB / 768MiB"
+        },
+        {
+          "name": "redis-1",
+          "cpu_pct": 2.47,
+          "memory": "4.863MiB / 128MiB"
+        }
+      ]
+    }
+  ]
+}

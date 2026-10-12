@@ -1,0 +1,195 @@
+{
+  "date": "2026-10-13",
+  "scope": "local controlled laboratory baseline, not production capacity",
+  "profiles": {
+    "read_one_cached": {
+      "stable": {
+        "vus": 10,
+        "requests": 252,
+        "observed_seconds": 8.239,
+        "rps": 30.586236193712825,
+        "avg_ms": 323.71461348412714,
+        "p50_ms": 296.816917,
+        "p95_ms": 497.88114179999997,
+        "p99_ms": 544.1607161000001,
+        "error_rate": 0,
+        "completed_workflows": 0
+      },
+      "saturation_interval_vus": [
+        1,
+        10
+      ],
+      "slo": {
+        "p95_ms": 500,
+        "p99_ms": 1000,
+        "error_rate_below": 0.01
+      }
+    },
+    "read_three_cached": {
+      "stable": {
+        "vus": 10,
+        "requests": 675,
+        "observed_seconds": 8.311,
+        "rps": 81.21766333774515,
+        "avg_ms": 120.82766452148132,
+        "p50_ms": 101.270956,
+        "p95_ms": 247.61725519999993,
+        "p99_ms": 367.70507967999976,
+        "error_rate": 0,
+        "completed_workflows": 0
+      },
+      "saturation_interval_vus": [
+        10,
+        25
+      ],
+      "slo": {
+        "p95_ms": 500,
+        "p99_ms": 1000,
+        "error_rate_below": 0.01
+      }
+    },
+    "read_three_uncached": {
+      "stable": {
+        "vus": 1,
+        "requests": 88,
+        "observed_seconds": 8.01,
+        "rps": 10.986267166042447,
+        "avg_ms": 90.71573878409093,
+        "p50_ms": 79.981439,
+        "p95_ms": 136.44737844999997,
+        "p99_ms": 169.35861946999992,
+        "error_rate": 0,
+        "completed_workflows": 0
+      },
+      "saturation_interval_vus": [
+        10,
+        25
+      ],
+      "slo": {
+        "p95_ms": 500,
+        "p99_ms": 1000,
+        "error_rate_below": 0.01
+      }
+    },
+    "workflow_three": {
+      "stable": {
+        "vus": 10,
+        "requests": 3315,
+        "observed_seconds": 8.069,
+        "rps": 410.83157764283055,
+        "avg_ms": 24.04336472337855,
+        "p50_ms": 16.388272,
+        "p95_ms": 67.70842689999989,
+        "p99_ms": 164.64451232000002,
+        "error_rate": 0,
+        "completed_workflows": 663
+      },
+      "saturation_interval_vus": [
+        10,
+        25
+      ],
+      "slo": {
+        "p95_ms": 500,
+        "p99_ms": 1000,
+        "error_rate_below": 0.01
+      }
+    },
+    "write_three": {
+      "stable": {
+        "vus": 10,
+        "requests": 4542,
+        "observed_seconds": 8.01,
+        "rps": 567.0411985018727,
+        "avg_ms": 17.392713090268607,
+        "p50_ms": 13.510292,
+        "p95_ms": 36.222112,
+        "p99_ms": 92.62059168000017,
+        "error_rate": 0,
+        "completed_workflows": 0
+      },
+      "saturation_interval_vus": [
+        10,
+        25
+      ],
+      "slo": {
+        "p95_ms": 500,
+        "p99_ms": 1000,
+        "error_rate_below": 0.01
+      }
+    }
+  },
+  "system_performance_baseline": {
+    "primary_workload": "Scenario A: public statistics, three instances, warm Redis",
+    "environment": "12 logical CPU / 16726044672 bytes Docker RAM; per-instance 1 CPU/512MiB; DB 2 CPU/768MiB",
+    "stable_throughput_rps": 81.21766333774515,
+    "p95_ms": 247.61725519999993,
+    "p99_ms": 367.70507967999976,
+    "error_rate": 0,
+    "saturation_interval_vus": [
+      10,
+      25
+    ],
+    "critical_scenario": "Scenario A without cache: repeated public statistics aggregation",
+    "error_rate_at_observed_saturation": 0,
+    "primary_bottleneck": "Application CPU; exact hot path requires profiling (Lab 9)",
+    "evidence_peak_cpu_pct": {
+      "scaling-gateway-1": 16.23,
+      "license-service-1-1": 100.8,
+      "license-service-3-1": 102.19,
+      "license-service-2-1": 101.98,
+      "license-postgres-1": 3.94,
+      "redis-1": 9.82,
+      "k6": 15.95
+    }
+  },
+  "comparisons": [
+    {
+      "vus": 1,
+      "scaling_ratio": 1.0632921605143828,
+      "scaling_efficiency": 0.35443072017146093,
+      "caching_ratio": 2.9211839297066575,
+      "cached_p95_ms": 50.03239719999999,
+      "uncached_p95_ms": 136.44737844999997
+    },
+    {
+      "vus": 10,
+      "scaling_ratio": 2.6553663819035016,
+      "scaling_efficiency": 0.8851221273011672,
+      "caching_ratio": 2.6476338265942037,
+      "cached_p95_ms": 247.61725519999993,
+      "uncached_p95_ms": 553.7693001499999
+    },
+    {
+      "vus": 25,
+      "scaling_ratio": 2.5328734931894337,
+      "scaling_efficiency": 0.8442911643964779,
+      "caching_ratio": 2.741198919019947,
+      "cached_p95_ms": 549.0566526499998,
+      "uncached_p95_ms": 1396.7245035
+    },
+    {
+      "vus": 50,
+      "scaling_ratio": 2.342936541438019,
+      "scaling_efficiency": 0.7809788471460064,
+      "caching_ratio": 2.5130893516680506,
+      "cached_p95_ms": 1034.7139408,
+      "uncached_p95_ms": 2700.2197062
+    },
+    {
+      "vus": 100,
+      "scaling_ratio": 2.6730974514557864,
+      "scaling_efficiency": 0.8910324838185955,
+      "caching_ratio": 2.6743308813301363,
+      "cached_p95_ms": 1553.5770020999996,
+      "uncached_p95_ms": 3840.08040375
+    },
+    {
+      "vus": 200,
+      "scaling_ratio": 2.5484541954122073,
+      "scaling_efficiency": 0.8494847318040691,
+      "caching_ratio": 2.515868445373245,
+      "cached_p95_ms": 2846.0177465499996,
+      "uncached_p95_ms": 6670.5720028
+    }
+  ]
+}
