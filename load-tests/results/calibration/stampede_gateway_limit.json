@@ -1,0 +1,32 @@
+[
+  {
+    "vus": 500,
+    "requests": 500,
+    "avg_ms": 4179.489724345999,
+    "p50_ms": 34.360907,
+    "p95_ms": 12030.615561899996,
+    "p99_ms": 12378.589732389999,
+    "error_rate": 0.522,
+    "elapsed_seconds": 17.544706115,
+    "protected": false,
+    "computations": 239,
+    "stats_select_calls": 2629,
+    "generation_delay_ms": 2000,
+    "burst_rps_including_gate": 28.498624982525104
+  },
+  {
+    "vus": 500,
+    "requests": 500,
+    "avg_ms": 1673.1503987159992,
+    "p50_ms": 31.6441655,
+    "p95_ms": 4370.9749033,
+    "p99_ms": 4526.428447529999,
+    "error_rate": 0.522,
+    "elapsed_seconds": 9.725793312,
+    "protected": true,
+    "computations": 1,
+    "stats_select_calls": 11,
+    "generation_delay_ms": 2000,
+    "burst_rps_including_gate": 51.40968802854197
+  }
+]
