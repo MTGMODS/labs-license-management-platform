@@ -1,0 +1,2069 @@
+[
+  {
+    "mode": "negative",
+    "label": "unprotected",
+    "summary": {
+      "mode": "negative",
+      "requests": 8177,
+      "hits": 0,
+      "avg_ms": 48.2033405058089,
+      "p50_ms": 13.223097,
+      "p95_ms": 146.07915919999988,
+      "p99_ms": 489.8541736799991,
+      "error_rate": 0,
+      "latency_timeline": [
+        {
+          "second": 14,
+          "max": 0,
+          "avg": 0,
+          "med": 0,
+          "p(95)": 0,
+          "p(99)": 0,
+          "min": 0
+        },
+        {
+          "second": 1,
+          "min": 2.641801,
+          "max": 1043.083851,
+          "avg": 45.27293080387096,
+          "med": 19.640262,
+          "p(95)": 110.8043827999999,
+          "p(99)": 863.2838056599983
+        },
+        {
+          "second": 2,
+          "p(95)": 514.9736108,
+          "p(99)": 549.5235320400001,
+          "min": 3.843652,
+          "max": 565.097736,
+          "avg": 142.2130344095564,
+          "med": 35.969791
+        },
+        {
+          "second": 11,
+          "avg": 30.512924171842627,
+          "med": 8.988619,
+          "p(95)": 95.35246575,
+          "p(99)": 110.47795995000001,
+          "min": 2.686684,
+          "max": 117.726481
+        },
+        {
+          "second": 15,
+          "p(95)": 0,
+          "p(99)": 0,
+          "min": 0,
+          "max": 0,
+          "avg": 0,
+          "med": 0
+        },
+        {
+          "second": 13,
+          "med": 0,
+          "p(95)": 0,
+          "p(99)": 0,
+          "min": 0,
+          "max": 0,
+          "avg": 0
+        },
+        {
+          "second": 0,
+          "med": 16.243733,
+          "p(95)": 882.647146,
+          "p(99)": 950.493866,
+          "min": 4.426864,
+          "max": 975.860902,
+          "avg": 136.91517083084588
+        },
+        {
+          "second": 10,
+          "min": 2.762036,
+          "max": 379.155045,
+          "avg": 44.344932836565064,
+          "med": 13.1618905,
+          "p(95)": 167.47980644999996,
+          "p(99)": 258.44845478999997
+        },
+        {
+          "second": 8,
+          "min": 3.167804,
+          "max": 810.769421,
+          "avg": 96.62501011822658,
+          "med": 23.9789655,
+          "p(95)": 504.91501949999997,
+          "p(99)": 687.7964443999999
+        },
+        {
+          "second": 9,
+          "max": 97.705507,
+          "avg": 29.611332720081133,
+          "med": 9.3702,
+          "p(95)": 81.43505400000001,
+          "p(99)": 91.4020242,
+          "min": 2.807286
+        },
+        {
+          "second": 3,
+          "min": 2.773757,
+          "max": 146.647832,
+          "avg": 34.504124072625714,
+          "med": 9.201162,
+          "p(95)": 103.53339199999998,
+          "p(99)": 112.42513467999997
+        },
+        {
+          "second": 6,
+          "avg": 54.71529274326467,
+          "med": 14.249609,
+          "p(95)": 224.5055335,
+          "p(99)": 265.03656150000006,
+          "min": 3.454226,
+          "max": 439.259542
+        },
+        {
+          "second": 5,
+          "p(99)": 107.96680104999999,
+          "min": 3.41593,
+          "max": 110.92804,
+          "avg": 33.166315423076895,
+          "med": 10.3308415,
+          "p(95)": 100.62493619999998
+        },
+        {
+          "second": 12,
+          "avg": 90.54751184848485,
+          "med": 104.028243,
+          "p(95)": 117.6834722,
+          "p(99)": 120.37919584,
+          "min": 15.74517,
+          "max": 121.498296
+        },
+        {
+          "second": 4,
+          "max": 224.057114,
+          "avg": 52.62377285714291,
+          "med": 21.15766,
+          "p(95)": 172.35630719999955,
+          "p(99)": 211.246199,
+          "min": 4.064758
+        },
+        {
+          "second": 7,
+          "max": 171.069713,
+          "avg": 38.408818576203245,
+          "med": 11.66753,
+          "p(95)": 92.22961414999999,
+          "p(99)": 111.32479370999988,
+          "min": 3.023178
+        }
+      ],
+      "elapsed_seconds": 12.087004877,
+      "rps": 676.5116820263528
+    },
+    "database": {
+      "calls": 8177,
+      "execution_ms": 301.50185199999873
+    },
+    "database_timeline": [
+      {
+        "calls": 0,
+        "execution_ms": 0,
+        "elapsed_s": 0.609
+      },
+      {
+        "calls": 199,
+        "execution_ms": 6.421848999999999,
+        "elapsed_s": 2.094
+      },
+      {
+        "calls": 1030,
+        "execution_ms": 32.45502299999998,
+        "elapsed_s": 3.516
+      },
+      {
+        "calls": 1676,
+        "execution_ms": 61.69509999999997,
+        "elapsed_s": 4.547
+      },
+      {
+        "calls": 2658,
+        "execution_ms": 96.20348800000004,
+        "elapsed_s": 5.953
+      },
+      {
+        "calls": 3597,
+        "execution_ms": 129.0719579999998,
+        "elapsed_s": 6.984
+      },
+      {
+        "calls": 4265,
+        "execution_ms": 153.73213699999988,
+        "elapsed_s": 8.047
+      },
+      {
+        "calls": 5066,
+        "execution_ms": 180.8824829999997,
+        "elapsed_s": 9.094
+      },
+      {
+        "calls": 5481,
+        "execution_ms": 200.45362699999944,
+        "elapsed_s": 10.125
+      },
+      {
+        "calls": 6480,
+        "execution_ms": 231.99367599999917,
+        "elapsed_s": 11.156
+      },
+      {
+        "calls": 7227,
+        "execution_ms": 266.3481199999992,
+        "elapsed_s": 12.172
+      },
+      {
+        "calls": 8177,
+        "execution_ms": 301.50185199999873,
+        "elapsed_s": 13.281
+      },
+      {
+        "calls": 8177,
+        "execution_ms": 301.50185199999873,
+        "elapsed_s": 14.281
+      }
+    ],
+    "resources": [
+      {
+        "elapsed_s": 2.25,
+        "containers": [
+          {
+            "name": "scaling-gateway-1",
+            "cpu_pct": 0.89,
+            "memory": "4.34MiB / 128MiB"
+          },
+          {
+            "name": "license-service-2-1",
+            "cpu_pct": 69.72,
+            "memory": "73.75MiB / 512MiB"
+          },
+          {
+            "name": "license-service-3-1",
+            "cpu_pct": 77.85,
+            "memory": "74MiB / 512MiB"
+          },
+          {
+            "name": "license-service-1-1",
+            "cpu_pct": 80.65,
+            "memory": "73.73MiB / 512MiB"
+          },
+          {
+            "name": "license-postgres-1",
+            "cpu_pct": 145.83,
+            "memory": "84.93MiB / 768MiB"
+          },
+          {
+            "name": "redis-1",
+            "cpu_pct": 0.35,
+            "memory": "3.703MiB / 128MiB"
+          },
+          {
+            "name": "k6-run-b407b0f73636",
+            "cpu_pct": 22.31,
+            "memory": "20.41MiB / 1GiB"
+          }
+        ]
+      },
+      {
+        "elapsed_s": 4.312,
+        "containers": [
+          {
+            "name": "k6-run-b407b0f73636",
+            "cpu_pct": 32.08,
+            "memory": "21.81MiB / 1GiB"
+          },
+          {
+            "name": "scaling-gateway-1",
+            "cpu_pct": 20.14,
+            "memory": "4.648MiB / 128MiB"
+          },
+          {
+            "name": "license-service-2-1",
+            "cpu_pct": 95.13,
+            "memory": "74.08MiB / 512MiB"
+          },
+          {
+            "name": "license-service-3-1",
+            "cpu_pct": 97.73,
+            "memory": "73.92MiB / 512MiB"
+          },
+          {
+            "name": "license-service-1-1",
+            "cpu_pct": 106.2,
+            "memory": "75MiB / 512MiB"
+          },
+          {
+            "name": "license-postgres-1",
+            "cpu_pct": 33.27,
+            "memory": "87.61MiB / 768MiB"
+          },
+          {
+            "name": "redis-1",
+            "cpu_pct": 0.4,
+            "memory": "3.703MiB / 128MiB"
+          }
+        ]
+      },
+      {
+        "elapsed_s": 6.359,
+        "containers": [
+          {
+            "name": "k6-run-b407b0f73636",
+            "cpu_pct": 42.33,
+            "memory": "24.53MiB / 1GiB"
+          },
+          {
+            "name": "scaling-gateway-1",
+            "cpu_pct": 28.53,
+            "memory": "4.875MiB / 128MiB"
+          },
+          {
+            "name": "license-service-2-1",
+            "cpu_pct": 99.46,
+            "memory": "74.2MiB / 512MiB"
+          },
+          {
+            "name": "license-service-3-1",
+            "cpu_pct": 98.1,
+            "memory": "74MiB / 512MiB"
+          },
+          {
+            "name": "license-service-1-1",
+            "cpu_pct": 102.38,
+            "memory": "75.78MiB / 512MiB"
+          },
+          {
+            "name": "license-postgres-1",
+            "cpu_pct": 45.25,
+            "memory": "87.24MiB / 768MiB"
+          },
+          {
+            "name": "redis-1",
+            "cpu_pct": 0.4,
+            "memory": "3.703MiB / 128MiB"
+          }
+        ]
+      },
+      {
+        "elapsed_s": 8.391,
+        "containers": [
+          {
+            "name": "k6-run-b407b0f73636",
+            "cpu_pct": 39.9,
+            "memory": "25.74MiB / 1GiB"
+          },
+          {
+            "name": "scaling-gateway-1",
+            "cpu_pct": 27.91,
+            "memory": "5.398MiB / 128MiB"
+          },
+          {
+            "name": "license-service-2-1",
+            "cpu_pct": 97.94,
+            "memory": "74.23MiB / 512MiB"
+          },
+          {
+            "name": "license-service-3-1",
+            "cpu_pct": 97.32,
+            "memory": "74.04MiB / 512MiB"
+          },
+          {
+            "name": "license-service-1-1",
+            "cpu_pct": 103.37,
+            "memory": "76.18MiB / 512MiB"
+          },
+          {
+            "name": "license-postgres-1",
+            "cpu_pct": 37.49,
+            "memory": "87.65MiB / 768MiB"
+          },
+          {
+            "name": "redis-1",
+            "cpu_pct": 3.46,
+            "memory": "3.703MiB / 128MiB"
+          }
+        ]
+      },
+      {
+        "elapsed_s": 10.422,
+        "containers": [
+          {
+            "name": "k6-run-b407b0f73636",
+            "cpu_pct": 34.39,
+            "memory": "25.32MiB / 1GiB"
+          },
+          {
+            "name": "scaling-gateway-1",
+            "cpu_pct": 23.14,
+            "memory": "5.562MiB / 128MiB"
+          },
+          {
+            "name": "license-service-2-1",
+            "cpu_pct": 101.64,
+            "memory": "74.97MiB / 512MiB"
+          },
+          {
+            "name": "license-service-3-1",
+            "cpu_pct": 101.33,
+            "memory": "74.54MiB / 512MiB"
+          },
+          {
+            "name": "license-service-1-1",
+            "cpu_pct": 96.94,
+            "memory": "76.13MiB / 512MiB"
+          },
+          {
+            "name": "license-postgres-1",
+            "cpu_pct": 48.34,
+            "memory": "87.69MiB / 768MiB"
+          },
+          {
+            "name": "redis-1",
+            "cpu_pct": 0.42,
+            "memory": "3.699MiB / 128MiB"
+          }
+        ]
+      },
+      {
+        "elapsed_s": 12.469,
+        "containers": [
+          {
+            "name": "k6-run-b407b0f73636",
+            "cpu_pct": 39.44,
+            "memory": "25.12MiB / 1GiB"
+          },
+          {
+            "name": "scaling-gateway-1",
+            "cpu_pct": 25.92,
+            "memory": "5.84MiB / 128MiB"
+          },
+          {
+            "name": "license-service-2-1",
+            "cpu_pct": 100.76,
+            "memory": "75.82MiB / 512MiB"
+          },
+          {
+            "name": "license-service-3-1",
+            "cpu_pct": 89.71,
+            "memory": "74.54MiB / 512MiB"
+          },
+          {
+            "name": "license-service-1-1",
+            "cpu_pct": 89.63,
+            "memory": "76.38MiB / 512MiB"
+          },
+          {
+            "name": "license-postgres-1",
+            "cpu_pct": 43.95,
+            "memory": "87.79MiB / 768MiB"
+          },
+          {
+            "name": "redis-1",
+            "cpu_pct": 0.36,
+            "memory": "3.699MiB / 128MiB"
+          }
+        ]
+      },
+      {
+        "elapsed_s": 14.734,
+        "containers": [
+          {
+            "name": "scaling-gateway-1",
+            "cpu_pct": 0.0,
+            "memory": "4.938MiB / 128MiB"
+          },
+          {
+            "name": "license-service-2-1",
+            "cpu_pct": 0.12,
+            "memory": "75.67MiB / 512MiB"
+          },
+          {
+            "name": "license-service-3-1",
+            "cpu_pct": 1.92,
+            "memory": "76.12MiB / 512MiB"
+          },
+          {
+            "name": "license-service-1-1",
+            "cpu_pct": 5.96,
+            "memory": "83.24MiB / 512MiB"
+          },
+          {
+            "name": "license-postgres-1",
+            "cpu_pct": 6.27,
+            "memory": "81.94MiB / 768MiB"
+          },
+          {
+            "name": "redis-1",
+            "cpu_pct": 0.31,
+            "memory": "3.699MiB / 128MiB"
+          }
+        ]
+      }
+    ],
+    "postgres_cpu_cgroup": [
+      {
+        "elapsed_s": 0.328,
+        "cpu_pct": 11.699999999938088
+      },
+      {
+        "elapsed_s": 0.437,
+        "cpu_pct": 57.73600000084017
+      },
+      {
+        "elapsed_s": 0.531,
+        "cpu_pct": 2.7918181818034085
+      },
+      {
+        "elapsed_s": 0.641,
+        "cpu_pct": 3.454999999924585
+      },
+      {
+        "elapsed_s": 0.75,
+        "cpu_pct": 3.025454545538595
+      },
+      {
+        "elapsed_s": 0.844,
+        "cpu_pct": 3.8779999999153514
+      },
+      {
+        "elapsed_s": 0.953,
+        "cpu_pct": 29.035454545300905
+      },
+      {
+        "elapsed_s": 1.062,
+        "cpu_pct": 61.452000000894245
+      },
+      {
+        "elapsed_s": 1.156,
+        "cpu_pct": 74.70399999836937
+      },
+      {
+        "elapsed_s": 1.312,
+        "cpu_pct": 94.68133333471114
+      },
+      {
+        "elapsed_s": 1.531,
+        "cpu_pct": 163.96999999913234
+      },
+      {
+        "elapsed_s": 1.703,
+        "cpu_pct": 225.5888888885241
+      },
+      {
+        "elapsed_s": 1.859,
+        "cpu_pct": 206.6566666696739
+      },
+      {
+        "elapsed_s": 1.969,
+        "cpu_pct": 169.7390909081927
+      },
+      {
+        "elapsed_s": 2.062,
+        "cpu_pct": 31.764999999306635
+      },
+      {
+        "elapsed_s": 2.172,
+        "cpu_pct": 31.37600000045658
+      },
+      {
+        "elapsed_s": 2.281,
+        "cpu_pct": 55.43909090879755
+      },
+      {
+        "elapsed_s": 2.375,
+        "cpu_pct": 55.42700000080657
+      },
+      {
+        "elapsed_s": 2.484,
+        "cpu_pct": 30.322999999338112
+      },
+      {
+        "elapsed_s": 2.578,
+        "cpu_pct": 22.870909091544465
+      },
+      {
+        "elapsed_s": 2.687,
+        "cpu_pct": 22.663999999505293
+      },
+      {
+        "elapsed_s": 2.797,
+        "cpu_pct": 15.217000000221436
+      },
+      {
+        "elapsed_s": 2.906,
+        "cpu_pct": 40.04454545433355
+      },
+      {
+        "elapsed_s": 3.016,
+        "cpu_pct": 15.805000000229994
+      },
+      {
+        "elapsed_s": 3.125,
+        "cpu_pct": 83.21181818137786
+      },
+      {
+        "elapsed_s": 3.266,
+        "cpu_pct": 45.435999999008224
+      },
+      {
+        "elapsed_s": 3.312,
+        "cpu_pct": 35.48200000051633
+      },
+      {
+        "elapsed_s": 3.437,
+        "cpu_pct": 36.24363636344457
+      },
+      {
+        "elapsed_s": 3.547,
+        "cpu_pct": 23.694615384429724
+      },
+      {
+        "elapsed_s": 3.656,
+        "cpu_pct": 47.18000000068656
+      },
+      {
+        "elapsed_s": 3.766,
+        "cpu_pct": 33.8290909089119
+      },
+      {
+        "elapsed_s": 3.859,
+        "cpu_pct": 27.937000000406538
+      },
+      {
+        "elapsed_s": 3.969,
+        "cpu_pct": 27.7719999993938
+      },
+      {
+        "elapsed_s": 4.062,
+        "cpu_pct": 27.949090908943013
+      },
+      {
+        "elapsed_s": 4.172,
+        "cpu_pct": 29.621000000431042
+      },
+      {
+        "elapsed_s": 4.266,
+        "cpu_pct": 29.46600000042879
+      },
+      {
+        "elapsed_s": 4.375,
+        "cpu_pct": 70.54454545417215
+      },
+      {
+        "elapsed_s": 4.484,
+        "cpu_pct": 26.101999999430248
+      },
+      {
+        "elapsed_s": 4.578,
+        "cpu_pct": 32.00100000046568
+      },
+      {
+        "elapsed_s": 4.687,
+        "cpu_pct": 25.799999999863477
+      },
+      {
+        "elapsed_s": 4.781,
+        "cpu_pct": 29.263000000425833
+      },
+      {
+        "elapsed_s": 4.891,
+        "cpu_pct": 29.946999999346325
+      },
+      {
+        "elapsed_s": 5.0,
+        "cpu_pct": 31.27545454632341
+      },
+      {
+        "elapsed_s": 5.125,
+        "cpu_pct": 67.56199999852525
+      },
+      {
+        "elapsed_s": 5.219,
+        "cpu_pct": 27.445454545309317
+      },
+      {
+        "elapsed_s": 5.344,
+        "cpu_pct": 79.94200000116331
+      },
+      {
+        "elapsed_s": 5.406,
+        "cpu_pct": 44.86090909067171
+      },
+      {
+        "elapsed_s": 5.516,
+        "cpu_pct": 28.577000000415854
+      },
+      {
+        "elapsed_s": 5.625,
+        "cpu_pct": 35.95499999921518
+      },
+      {
+        "elapsed_s": 5.734,
+        "cpu_pct": 76.11636363596087
+      },
+      {
+        "elapsed_s": 5.828,
+        "cpu_pct": 33.231000000483576
+      },
+      {
+        "elapsed_s": 5.937,
+        "cpu_pct": 28.83818181802922
+      },
+      {
+        "elapsed_s": 6.047,
+        "cpu_pct": 66.16545454510442
+      },
+      {
+        "elapsed_s": 6.141,
+        "cpu_pct": 34.37100000050016
+      },
+      {
+        "elapsed_s": 6.25,
+        "cpu_pct": 28.05999999985152
+      },
+      {
+        "elapsed_s": 6.359,
+        "cpu_pct": 29.886000000434898
+      },
+      {
+        "elapsed_s": 6.469,
+        "cpu_pct": 38.203999999166086
+      },
+      {
+        "elapsed_s": 6.562,
+        "cpu_pct": 25.042727272594757
+      },
+      {
+        "elapsed_s": 6.672,
+        "cpu_pct": 28.09400000040882
+      },
+      {
+        "elapsed_s": 6.781,
+        "cpu_pct": 67.66272727236922
+      },
+      {
+        "elapsed_s": 6.875,
+        "cpu_pct": 44.47100000064714
+      },
+      {
+        "elapsed_s": 6.984,
+        "cpu_pct": 14.12727272719797
+      },
+      {
+        "elapsed_s": 7.094,
+        "cpu_pct": 32.15900000046798
+      },
+      {
+        "elapsed_s": 7.203,
+        "cpu_pct": 19.44799999957549
+      },
+      {
+        "elapsed_s": 7.297,
+        "cpu_pct": 72.22999999961779
+      },
+      {
+        "elapsed_s": 7.391,
+        "cpu_pct": 31.283000000455225
+      },
+      {
+        "elapsed_s": 7.5,
+        "cpu_pct": 30.074000000437636
+      },
+      {
+        "elapsed_s": 7.609,
+        "cpu_pct": 27.917272727125
+      },
+      {
+        "elapsed_s": 7.703,
+        "cpu_pct": 32.21199999929688
+      },
+      {
+        "elapsed_s": 7.812,
+        "cpu_pct": 68.27181818145691
+      },
+      {
+        "elapsed_s": 7.922,
+        "cpu_pct": 38.035454546511204
+      },
+      {
+        "elapsed_s": 8.031,
+        "cpu_pct": 29.044999999366013
+      },
+      {
+        "elapsed_s": 8.125,
+        "cpu_pct": 28.625000000416552
+      },
+      {
+        "elapsed_s": 8.234,
+        "cpu_pct": 28.520909090758167
+      },
+      {
+        "elapsed_s": 8.328,
+        "cpu_pct": 36.23200000052725
+      },
+      {
+        "elapsed_s": 8.437,
+        "cpu_pct": 28.443999999379127
+      },
+      {
+        "elapsed_s": 8.547,
+        "cpu_pct": 30.008000000436674
+      },
+      {
+        "elapsed_s": 8.641,
+        "cpu_pct": 25.130909090776104
+      },
+      {
+        "elapsed_s": 8.75,
+        "cpu_pct": 30.755000000447545
+      },
+      {
+        "elapsed_s": 8.859,
+        "cpu_pct": 57.651818181513114
+      },
+      {
+        "elapsed_s": 8.969,
+        "cpu_pct": 50.11181818155301
+      },
+      {
+        "elapsed_s": 9.094,
+        "cpu_pct": 39.354999999140965
+      },
+      {
+        "elapsed_s": 9.187,
+        "cpu_pct": 81.7454545477255
+      },
+      {
+        "elapsed_s": 9.281,
+        "cpu_pct": 4.569999999900247
+      },
+      {
+        "elapsed_s": 9.391,
+        "cpu_pct": 13.679166666782782
+      },
+      {
+        "elapsed_s": 9.5,
+        "cpu_pct": 62.89600000091525
+      },
+      {
+        "elapsed_s": 9.609,
+        "cpu_pct": 125.31545454479142
+      },
+      {
+        "elapsed_s": 9.703,
+        "cpu_pct": 42.23399999907812
+      },
+      {
+        "elapsed_s": 9.812,
+        "cpu_pct": 30.08454545438626
+      },
+      {
+        "elapsed_s": 9.922,
+        "cpu_pct": 79.15500000115186
+      },
+      {
+        "elapsed_s": 10.016,
+        "cpu_pct": 33.09727272709759
+      },
+      {
+        "elapsed_s": 10.125,
+        "cpu_pct": 29.514000000429487
+      },
+      {
+        "elapsed_s": 10.234,
+        "cpu_pct": 30.199999999340797
+      },
+      {
+        "elapsed_s": 10.328,
+        "cpu_pct": 33.22000000048341
+      },
+      {
+        "elapsed_s": 10.437,
+        "cpu_pct": 27.82909090894365
+      },
+      {
+        "elapsed_s": 10.531,
+        "cpu_pct": 32.43000000047192
+      },
+      {
+        "elapsed_s": 10.641,
+        "cpu_pct": 31.174999999319517
+      },
+      {
+        "elapsed_s": 10.75,
+        "cpu_pct": 28.037272728051626
+      },
+      {
+        "elapsed_s": 10.844,
+        "cpu_pct": 28.99599999936708
+      },
+      {
+        "elapsed_s": 10.953,
+        "cpu_pct": 70.22909090871929
+      },
+      {
+        "elapsed_s": 11.062,
+        "cpu_pct": 36.912727272531946
+      },
+      {
+        "elapsed_s": 11.187,
+        "cpu_pct": 99.45818182094486
+      },
+      {
+        "elapsed_s": 11.281,
+        "cpu_pct": 43.934999999041
+      },
+      {
+        "elapsed_s": 11.391,
+        "cpu_pct": 56.69454545424545
+      },
+      {
+        "elapsed_s": 11.5,
+        "cpu_pct": 94.54727272989933
+      },
+      {
+        "elapsed_s": 11.594,
+        "cpu_pct": 32.7469999992852
+      },
+      {
+        "elapsed_s": 11.703,
+        "cpu_pct": 32.8410000004779
+      },
+      {
+        "elapsed_s": 11.797,
+        "cpu_pct": 27.9436363634885
+      },
+      {
+        "elapsed_s": 11.906,
+        "cpu_pct": 34.17099999925412
+      },
+      {
+        "elapsed_s": 12.016,
+        "cpu_pct": 80.2230000011674
+      },
+      {
+        "elapsed_s": 12.109,
+        "cpu_pct": 24.736363636232742
+      },
+      {
+        "elapsed_s": 12.219,
+        "cpu_pct": 28.958000000421396
+      },
+      {
+        "elapsed_s": 12.312,
+        "cpu_pct": 30.56699999933279
+      },
+      {
+        "elapsed_s": 12.422,
+        "cpu_pct": 26.283636364366547
+      },
+      {
+        "elapsed_s": 12.531,
+        "cpu_pct": 31.338999999315938
+      },
+      {
+        "elapsed_s": 12.625,
+        "cpu_pct": 29.499000000429266
+      },
+      {
+        "elapsed_s": 12.734,
+        "cpu_pct": 27.90909090894323
+      },
+      {
+        "elapsed_s": 12.828,
+        "cpu_pct": 29.31500000042659
+      },
+      {
+        "elapsed_s": 12.937,
+        "cpu_pct": 32.9119999992816
+      },
+      {
+        "elapsed_s": 13.047,
+        "cpu_pct": 51.45999999972769
+      },
+      {
+        "elapsed_s": 13.172,
+        "cpu_pct": 9.915000000144282
+      },
+      {
+        "elapsed_s": 13.266,
+        "cpu_pct": 2.8590909090757797
+      },
+      {
+        "elapsed_s": 13.359,
+        "cpu_pct": 3.5290000000513535
+      },
+      {
+        "elapsed_s": 13.469,
+        "cpu_pct": 2.2745454545334187
+      },
+      {
+        "elapsed_s": 13.562,
+        "cpu_pct": 3.356999999926724
+      },
+      {
+        "elapsed_s": 13.672,
+        "cpu_pct": 3.0380000000442084
+      },
+      {
+        "elapsed_s": 13.766,
+        "cpu_pct": 3.089000000044951
+      }
+    ],
+    "cpu_sampling_target_seconds": 0.1,
+    "warmup_sql_calls": 5,
+    "repeated_missing_ids": 5,
+    "negative_ttl_seconds": 15,
+    "dataset_initial_licenses": 2000
+  },
+  {
+    "mode": "negative",
+    "label": "protected",
+    "summary": {
+      "mode": "negative",
+      "requests": 15294,
+      "hits": 15294,
+      "avg_ms": 20.773444361449002,
+      "p50_ms": 12.3448755,
+      "p95_ms": 60.18471699999995,
+      "p99_ms": 125.60718249999977,
+      "error_rate": 0,
+      "latency_timeline": [
+        {
+          "second": 4,
+          "med": 13.1151515,
+          "p(95)": 63.0951222,
+          "p(99)": 81.18371090000005,
+          "min": 1.538932,
+          "max": 90.976954,
+          "avg": 21.86685406412337
+        },
+        {
+          "second": 1,
+          "p(99)": 39.28916688,
+          "min": 1.928393,
+          "max": 49.720531,
+          "avg": 17.303881871238616,
+          "med": 17.966365,
+          "p(95)": 33.5279594
+        },
+        {
+          "second": 12,
+          "med": 18.104345000000002,
+          "p(95)": 22.6841706,
+          "p(99)": 23.197240519999998,
+          "min": 2.374891,
+          "max": 23.325508,
+          "avg": 15.898904199999999
+        },
+        {
+          "second": 15,
+          "max": 0,
+          "avg": 0,
+          "med": 0,
+          "p(95)": 0,
+          "p(99)": 0,
+          "min": 0
+        },
+        {
+          "second": 11,
+          "min": 1.455576,
+          "max": 93.778287,
+          "avg": 14.378270557763972,
+          "med": 7.057441000000001,
+          "p(95)": 39.42562375,
+          "p(99)": 88.78807482
+        },
+        {
+          "second": 7,
+          "max": 127.03115,
+          "avg": 21.398647053745925,
+          "med": 11.9221195,
+          "p(95)": 56.559039399999996,
+          "p(99)": 98.65949793,
+          "min": 1.703522
+        },
+        {
+          "second": 2,
+          "max": 254.064582,
+          "avg": 38.64565933463545,
+          "med": 18.029833,
+          "p(95)": 177.7948913,
+          "p(99)": 219.72022909000003,
+          "min": 1.826418
+        },
+        {
+          "second": 0,
+          "p(95)": 44.62512850000001,
+          "p(99)": 99.69263247000004,
+          "min": 2.668054,
+          "max": 117.888989,
+          "avg": 20.317835119344743,
+          "med": 15.604202
+        },
+        {
+          "second": 13,
+          "p(99)": 0,
+          "min": 0,
+          "max": 0,
+          "avg": 0,
+          "med": 0,
+          "p(95)": 0
+        },
+        {
+          "second": 9,
+          "max": 96.151517,
+          "avg": 17.58757457971012,
+          "med": 7.023961,
+          "p(95)": 55.44120379999999,
+          "p(99)": 85.76094491999999,
+          "min": 1.521326
+        },
+        {
+          "second": 10,
+          "max": 96.710995,
+          "avg": 21.68086021537229,
+          "med": 11.863478,
+          "p(95)": 59.46345219999998,
+          "p(99)": 82.03815704,
+          "min": 1.159242
+        },
+        {
+          "second": 6,
+          "p(95)": 57.12361454999998,
+          "p(99)": 100.55705592,
+          "min": 1.570245,
+          "max": 121.067199,
+          "avg": 20.11431315177196,
+          "med": 10.081326
+        },
+        {
+          "second": 3,
+          "med": 6.316021,
+          "p(95)": 63.09285344999999,
+          "p(99)": 156.56102757999994,
+          "min": 1.464481,
+          "max": 169.833077,
+          "avg": 19.57278473237409
+        },
+        {
+          "second": 5,
+          "p(95)": 38.80611309999999,
+          "p(99)": 65.90731111999996,
+          "min": 1.461908,
+          "max": 74.49424,
+          "avg": 14.555426304347828,
+          "med": 7.193426
+        },
+        {
+          "second": 14,
+          "p(95)": 0,
+          "p(99)": 0,
+          "min": 0,
+          "max": 0,
+          "avg": 0,
+          "med": 0
+        },
+        {
+          "second": 8,
+          "avg": 42.01088116755318,
+          "med": 28.0258575,
+          "p(95)": 122.62518674999997,
+          "p(99)": 177.28290162000008,
+          "min": 2.825524,
+          "max": 192.68235
+        }
+      ],
+      "elapsed_seconds": 12.023905009,
+      "rps": 1271.9661365049296
+    },
+    "database": {
+      "calls": 0,
+      "execution_ms": 0
+    },
+    "database_timeline": [
+      {
+        "calls": 0,
+        "execution_ms": 0,
+        "elapsed_s": 0.594
+      },
+      {
+        "calls": 0,
+        "execution_ms": 0,
+        "elapsed_s": 1.688
+      },
+      {
+        "calls": 0,
+        "execution_ms": 0,
+        "elapsed_s": 2.797
+      },
+      {
+        "calls": 0,
+        "execution_ms": 0,
+        "elapsed_s": 4.047
+      },
+      {
+        "calls": 0,
+        "execution_ms": 0,
+        "elapsed_s": 5.063
+      },
+      {
+        "calls": 0,
+        "execution_ms": 0,
+        "elapsed_s": 6.141
+      },
+      {
+        "calls": 0,
+        "execution_ms": 0,
+        "elapsed_s": 7.203
+      },
+      {
+        "calls": 0,
+        "execution_ms": 0,
+        "elapsed_s": 8.203
+      },
+      {
+        "calls": 0,
+        "execution_ms": 0,
+        "elapsed_s": 9.344
+      },
+      {
+        "calls": 0,
+        "execution_ms": 0,
+        "elapsed_s": 10.36
+      },
+      {
+        "calls": 0,
+        "execution_ms": 0,
+        "elapsed_s": 11.407
+      },
+      {
+        "calls": 0,
+        "execution_ms": 0,
+        "elapsed_s": 12.422
+      },
+      {
+        "calls": 0,
+        "execution_ms": 0,
+        "elapsed_s": 13.36
+      }
+    ],
+    "resources": [
+      {
+        "elapsed_s": 2.61,
+        "containers": [
+          {
+            "name": "scaling-gateway-1",
+            "cpu_pct": 21.1,
+            "memory": "4.41MiB / 128MiB"
+          },
+          {
+            "name": "license-service-2-1",
+            "cpu_pct": 56.4,
+            "memory": "73.66MiB / 512MiB"
+          },
+          {
+            "name": "license-service-3-1",
+            "cpu_pct": 55.51,
+            "memory": "73.07MiB / 512MiB"
+          },
+          {
+            "name": "license-service-1-1",
+            "cpu_pct": 55.72,
+            "memory": "73.73MiB / 512MiB"
+          },
+          {
+            "name": "license-postgres-1",
+            "cpu_pct": 7.78,
+            "memory": "48.64MiB / 768MiB"
+          },
+          {
+            "name": "redis-1",
+            "cpu_pct": 6.82,
+            "memory": "3.82MiB / 128MiB"
+          },
+          {
+            "name": "k6-run-55f8164bfece",
+            "cpu_pct": 60.39,
+            "memory": "24.34MiB / 1GiB"
+          }
+        ]
+      },
+      {
+        "elapsed_s": 4.703,
+        "containers": [
+          {
+            "name": "k6-run-55f8164bfece",
+            "cpu_pct": 48.29,
+            "memory": "24.98MiB / 1GiB"
+          },
+          {
+            "name": "scaling-gateway-1",
+            "cpu_pct": 32.55,
+            "memory": "5.316MiB / 128MiB"
+          },
+          {
+            "name": "license-service-2-1",
+            "cpu_pct": 101.66,
+            "memory": "75.52MiB / 512MiB"
+          },
+          {
+            "name": "license-service-3-1",
+            "cpu_pct": 95.82,
+            "memory": "73.88MiB / 512MiB"
+          },
+          {
+            "name": "license-service-1-1",
+            "cpu_pct": 96.26,
+            "memory": "74.26MiB / 512MiB"
+          },
+          {
+            "name": "license-postgres-1",
+            "cpu_pct": 8.75,
+            "memory": "48.37MiB / 768MiB"
+          },
+          {
+            "name": "redis-1",
+            "cpu_pct": 12.58,
+            "memory": "3.836MiB / 128MiB"
+          }
+        ]
+      },
+      {
+        "elapsed_s": 6.75,
+        "containers": [
+          {
+            "name": "k6-run-55f8164bfece",
+            "cpu_pct": 56.62,
+            "memory": "25.21MiB / 1GiB"
+          },
+          {
+            "name": "scaling-gateway-1",
+            "cpu_pct": 40.63,
+            "memory": "5.453MiB / 128MiB"
+          },
+          {
+            "name": "license-service-2-1",
+            "cpu_pct": 98.11,
+            "memory": "75.96MiB / 512MiB"
+          },
+          {
+            "name": "license-service-3-1",
+            "cpu_pct": 96.36,
+            "memory": "74.2MiB / 512MiB"
+          },
+          {
+            "name": "license-service-1-1",
+            "cpu_pct": 92.24,
+            "memory": "74.5MiB / 512MiB"
+          },
+          {
+            "name": "license-postgres-1",
+            "cpu_pct": 7.37,
+            "memory": "48.69MiB / 768MiB"
+          },
+          {
+            "name": "redis-1",
+            "cpu_pct": 10.57,
+            "memory": "3.848MiB / 128MiB"
+          }
+        ]
+      },
+      {
+        "elapsed_s": 8.813,
+        "containers": [
+          {
+            "name": "k6-run-55f8164bfece",
+            "cpu_pct": 53.09,
+            "memory": "26.33MiB / 1GiB"
+          },
+          {
+            "name": "scaling-gateway-1",
+            "cpu_pct": 40.74,
+            "memory": "6.074MiB / 128MiB"
+          },
+          {
+            "name": "license-service-2-1",
+            "cpu_pct": 90.98,
+            "memory": "75.71MiB / 512MiB"
+          },
+          {
+            "name": "license-service-3-1",
+            "cpu_pct": 97.84,
+            "memory": "74.43MiB / 512MiB"
+          },
+          {
+            "name": "license-service-1-1",
+            "cpu_pct": 104.14,
+            "memory": "74.38MiB / 512MiB"
+          },
+          {
+            "name": "license-postgres-1",
+            "cpu_pct": 7.52,
+            "memory": "48.36MiB / 768MiB"
+          },
+          {
+            "name": "redis-1",
+            "cpu_pct": 12.54,
+            "memory": "4.445MiB / 128MiB"
+          }
+        ]
+      },
+      {
+        "elapsed_s": 10.844,
+        "containers": [
+          {
+            "name": "k6-run-55f8164bfece",
+            "cpu_pct": 53.39,
+            "memory": "25.75MiB / 1GiB"
+          },
+          {
+            "name": "scaling-gateway-1",
+            "cpu_pct": 38.08,
+            "memory": "6.27MiB / 128MiB"
+          },
+          {
+            "name": "license-service-2-1",
+            "cpu_pct": 97.37,
+            "memory": "75.72MiB / 512MiB"
+          },
+          {
+            "name": "license-service-3-1",
+            "cpu_pct": 100.67,
+            "memory": "75.43MiB / 512MiB"
+          },
+          {
+            "name": "license-service-1-1",
+            "cpu_pct": 99.26,
+            "memory": "74.4MiB / 512MiB"
+          },
+          {
+            "name": "license-postgres-1",
+            "cpu_pct": 7.72,
+            "memory": "48.37MiB / 768MiB"
+          },
+          {
+            "name": "redis-1",
+            "cpu_pct": 9.94,
+            "memory": "3.852MiB / 128MiB"
+          }
+        ]
+      },
+      {
+        "elapsed_s": 12.875,
+        "containers": [
+          {
+            "name": "k6-run-55f8164bfece",
+            "cpu_pct": 56.48,
+            "memory": "26.81MiB / 1GiB"
+          },
+          {
+            "name": "scaling-gateway-1",
+            "cpu_pct": 42.51,
+            "memory": "6.312MiB / 128MiB"
+          },
+          {
+            "name": "license-service-2-1",
+            "cpu_pct": 101.17,
+            "memory": "75.72MiB / 512MiB"
+          },
+          {
+            "name": "license-service-3-1",
+            "cpu_pct": 95.59,
+            "memory": "75.43MiB / 512MiB"
+          },
+          {
+            "name": "license-service-1-1",
+            "cpu_pct": 96.5,
+            "memory": "74.5MiB / 512MiB"
+          },
+          {
+            "name": "license-postgres-1",
+            "cpu_pct": 11.86,
+            "memory": "48.82MiB / 768MiB"
+          },
+          {
+            "name": "redis-1",
+            "cpu_pct": 11.14,
+            "memory": "3.781MiB / 128MiB"
+          }
+        ]
+      },
+      {
+        "elapsed_s": 14.907,
+        "containers": [
+          {
+            "name": "scaling-gateway-1",
+            "cpu_pct": 0.0,
+            "memory": "5.668MiB / 128MiB"
+          },
+          {
+            "name": "license-service-2-1",
+            "cpu_pct": 0.12,
+            "memory": "75.67MiB / 512MiB"
+          },
+          {
+            "name": "license-service-3-1",
+            "cpu_pct": 0.12,
+            "memory": "75.38MiB / 512MiB"
+          },
+          {
+            "name": "license-service-1-1",
+            "cpu_pct": 0.13,
+            "memory": "74.46MiB / 512MiB"
+          },
+          {
+            "name": "license-postgres-1",
+            "cpu_pct": 3.06,
+            "memory": "48.49MiB / 768MiB"
+          },
+          {
+            "name": "redis-1",
+            "cpu_pct": 2.52,
+            "memory": "4.008MiB / 128MiB"
+          }
+        ]
+      }
+    ],
+    "postgres_cpu_cgroup": [
+      {
+        "elapsed_s": 0.282,
+        "cpu_pct": 3.01999999993408
+      },
+      {
+        "elapsed_s": 0.391,
+        "cpu_pct": 44.14000000122625
+      },
+      {
+        "elapsed_s": 0.485,
+        "cpu_pct": 3.8309999999163775
+      },
+      {
+        "elapsed_s": 0.594,
+        "cpu_pct": 3.7345454545256924
+      },
+      {
+        "elapsed_s": 0.703,
+        "cpu_pct": 3.294000000047934
+      },
+      {
+        "elapsed_s": 0.797,
+        "cpu_pct": 3.9999999999126885
+      },
+      {
+        "elapsed_s": 0.907,
+        "cpu_pct": 2.766363636440489
+      },
+      {
+        "elapsed_s": 1.0,
+        "cpu_pct": 3.4729999999241916
+      },
+      {
+        "elapsed_s": 1.11,
+        "cpu_pct": 2.5740000000374565
+      },
+      {
+        "elapsed_s": 1.219,
+        "cpu_pct": 2.7427272727127594
+      },
+      {
+        "elapsed_s": 1.313,
+        "cpu_pct": 3.057000000044485
+      },
+      {
+        "elapsed_s": 1.422,
+        "cpu_pct": 7.545999999835288
+      },
+      {
+        "elapsed_s": 1.532,
+        "cpu_pct": 40.505454545240205
+      },
+      {
+        "elapsed_s": 1.625,
+        "cpu_pct": 2.9780000000433358
+      },
+      {
+        "elapsed_s": 1.735,
+        "cpu_pct": 2.6072727272589304
+      },
+      {
+        "elapsed_s": 1.828,
+        "cpu_pct": 40.38400000058767
+      },
+      {
+        "elapsed_s": 1.938,
+        "cpu_pct": 2.4419999999466966
+      },
+      {
+        "elapsed_s": 2.047,
+        "cpu_pct": 3.234000000047061
+      },
+      {
+        "elapsed_s": 2.141,
+        "cpu_pct": 3.3554545454367894
+      },
+      {
+        "elapsed_s": 2.25,
+        "cpu_pct": 3.1210000000454166
+      },
+      {
+        "elapsed_s": 2.36,
+        "cpu_pct": 3.3449999999269857
+      },
+      {
+        "elapsed_s": 2.453,
+        "cpu_pct": 2.4836363636232215
+      },
+      {
+        "elapsed_s": 2.563,
+        "cpu_pct": 56.08454545610353
+      },
+      {
+        "elapsed_s": 2.672,
+        "cpu_pct": 22.805999999502195
+      },
+      {
+        "elapsed_s": 2.766,
+        "cpu_pct": 3.710909090889454
+      },
+      {
+        "elapsed_s": 2.875,
+        "cpu_pct": 3.6150000000526052
+      },
+      {
+        "elapsed_s": 2.985,
+        "cpu_pct": 4.080000000059372
+      },
+      {
+        "elapsed_s": 3.078,
+        "cpu_pct": 2.6299999999860835
+      },
+      {
+        "elapsed_s": 3.188,
+        "cpu_pct": 4.786999999895509
+      },
+      {
+        "elapsed_s": 3.313,
+        "cpu_pct": 2.582727272713606
+      },
+      {
+        "elapsed_s": 3.407,
+        "cpu_pct": 2.8840000000419677
+      },
+      {
+        "elapsed_s": 3.532,
+        "cpu_pct": 3.1630000000460274
+      },
+      {
+        "elapsed_s": 3.594,
+        "cpu_pct": 3.0072727272568143
+      },
+      {
+        "elapsed_s": 3.703,
+        "cpu_pct": 3.410999999925545
+      },
+      {
+        "elapsed_s": 3.813,
+        "cpu_pct": 26.723636364378773
+      },
+      {
+        "elapsed_s": 3.922,
+        "cpu_pct": 25.337999999446925
+      },
+      {
+        "elapsed_s": 4.032,
+        "cpu_pct": 6.968181818144946
+      },
+      {
+        "elapsed_s": 4.125,
+        "cpu_pct": 5.252000000076426
+      },
+      {
+        "elapsed_s": 4.235,
+        "cpu_pct": 3.0380000000442084
+      },
+      {
+        "elapsed_s": 4.328,
+        "cpu_pct": 2.977272727256973
+      },
+      {
+        "elapsed_s": 4.438,
+        "cpu_pct": 3.367999999926484
+      },
+      {
+        "elapsed_s": 4.547,
+        "cpu_pct": 4.4790909090672075
+      },
+      {
+        "elapsed_s": 4.641,
+        "cpu_pct": 3.1690000000461147
+      },
+      {
+        "elapsed_s": 4.75,
+        "cpu_pct": 3.930000000057189
+      },
+      {
+        "elapsed_s": 4.86,
+        "cpu_pct": 39.4854545452456
+      },
+      {
+        "elapsed_s": 4.953,
+        "cpu_pct": 9.06499999980213
+      },
+      {
+        "elapsed_s": 5.063,
+        "cpu_pct": 3.7040000000539
+      },
+      {
+        "elapsed_s": 5.157,
+        "cpu_pct": 2.7418181818036733
+      },
+      {
+        "elapsed_s": 5.266,
+        "cpu_pct": 3.1700000000461297
+      },
+      {
+        "elapsed_s": 5.375,
+        "cpu_pct": 3.8489999999159843
+      },
+      {
+        "elapsed_s": 5.485,
+        "cpu_pct": 2.238181818243997
+      },
+      {
+        "elapsed_s": 5.625,
+        "cpu_pct": 2.840909090894058
+      },
+      {
+        "elapsed_s": 5.688,
+        "cpu_pct": 2.9836363636205756
+      },
+      {
+        "elapsed_s": 5.797,
+        "cpu_pct": 4.540999999900879
+      },
+      {
+        "elapsed_s": 5.907,
+        "cpu_pct": 13.067272727635748
+      },
+      {
+        "elapsed_s": 6.0,
+        "cpu_pct": 34.81099999924015
+      },
+      {
+        "elapsed_s": 6.11,
+        "cpu_pct": 3.549000000051645
+      },
+      {
+        "elapsed_s": 6.219,
+        "cpu_pct": 2.4327272727144
+      },
+      {
+        "elapsed_s": 6.313,
+        "cpu_pct": 3.0170000000439035
+      },
+      {
+        "elapsed_s": 6.422,
+        "cpu_pct": 3.3199999999275316
+      },
+      {
+        "elapsed_s": 6.516,
+        "cpu_pct": 2.9899999999841778
+      },
+      {
+        "elapsed_s": 6.625,
+        "cpu_pct": 3.6610000000532743
+      },
+      {
+        "elapsed_s": 6.735,
+        "cpu_pct": 2.6590000000386937
+      },
+      {
+        "elapsed_s": 6.828,
+        "cpu_pct": 14.12727272719797
+      },
+      {
+        "elapsed_s": 6.938,
+        "cpu_pct": 30.528999999333617
+      },
+      {
+        "elapsed_s": 7.047,
+        "cpu_pct": 44.76600000065143
+      },
+      {
+        "elapsed_s": 7.141,
+        "cpu_pct": 2.5190909090775793
+      },
+      {
+        "elapsed_s": 7.25,
+        "cpu_pct": 3.3060000000481087
+      },
+      {
+        "elapsed_s": 7.36,
+        "cpu_pct": 3.1169999999319624
+      },
+      {
+        "elapsed_s": 7.5,
+        "cpu_pct": 3.052727272711119
+      },
+      {
+        "elapsed_s": 7.578,
+        "cpu_pct": 3.1940000000464783
+      },
+      {
+        "elapsed_s": 7.672,
+        "cpu_pct": 3.5154545454359436
+      },
+      {
+        "elapsed_s": 7.766,
+        "cpu_pct": 2.972000000043248
+      },
+      {
+        "elapsed_s": 7.875,
+        "cpu_pct": 3.1049999999322244
+      },
+      {
+        "elapsed_s": 7.969,
+        "cpu_pct": 17.821818182313287
+      },
+      {
+        "elapsed_s": 8.078,
+        "cpu_pct": 26.762999999415822
+      },
+      {
+        "elapsed_s": 8.172,
+        "cpu_pct": 3.66000000005326
+      },
+      {
+        "elapsed_s": 8.282,
+        "cpu_pct": 2.7272727272582955
+      },
+      {
+        "elapsed_s": 8.391,
+        "cpu_pct": 3.033000000044136
+      },
+      {
+        "elapsed_s": 8.516,
+        "cpu_pct": 5.088333333222266
+      },
+      {
+        "elapsed_s": 8.625,
+        "cpu_pct": 2.916363636348204
+      },
+      {
+        "elapsed_s": 8.719,
+        "cpu_pct": 3.0370000000441943
+      },
+      {
+        "elapsed_s": 8.828,
+        "cpu_pct": 4.495454545430757
+      },
+      {
+        "elapsed_s": 8.922,
+        "cpu_pct": 5.789000000084241
+      },
+      {
+        "elapsed_s": 9.032,
+        "cpu_pct": 2.337272727260359
+      },
+      {
+        "elapsed_s": 9.141,
+        "cpu_pct": 45.72200000066534
+      },
+      {
+        "elapsed_s": 9.235,
+        "cpu_pct": 3.5869999999217037
+      },
+      {
+        "elapsed_s": 9.344,
+        "cpu_pct": 2.7536363636217924
+      },
+      {
+        "elapsed_s": 9.453,
+        "cpu_pct": 3.2080000000466824
+      },
+      {
+        "elapsed_s": 9.547,
+        "cpu_pct": 3.6069999999212667
+      },
+      {
+        "elapsed_s": 9.657,
+        "cpu_pct": 2.530000000070286
+      },
+      {
+        "elapsed_s": 9.75,
+        "cpu_pct": 3.4319999999250865
+      },
+      {
+        "elapsed_s": 9.86,
+        "cpu_pct": 3.2920000000479046
+      },
+      {
+        "elapsed_s": 9.969,
+        "cpu_pct": 3.506363636345082
+      },
+      {
+        "elapsed_s": 10.063,
+        "cpu_pct": 4.047000000058891
+      },
+      {
+        "elapsed_s": 10.172,
+        "cpu_pct": 45.813999998999975
+      },
+      {
+        "elapsed_s": 10.266,
+        "cpu_pct": 3.4690909090725524
+      },
+      {
+        "elapsed_s": 10.375,
+        "cpu_pct": 3.4270000000498695
+      },
+      {
+        "elapsed_s": 10.485,
+        "cpu_pct": 2.80100000004076
+      },
+      {
+        "elapsed_s": 10.578,
+        "cpu_pct": 3.3663636363458234
+      },
+      {
+        "elapsed_s": 10.688,
+        "cpu_pct": 3.089999999932552
+      },
+      {
+        "elapsed_s": 10.782,
+        "cpu_pct": 3.0430000000442816
+      },
+      {
+        "elapsed_s": 10.891,
+        "cpu_pct": 2.8981818181664822
+      },
+      {
+        "elapsed_s": 11.0,
+        "cpu_pct": 3.5000000000509317
+      },
+      {
+        "elapsed_s": 11.094,
+        "cpu_pct": 2.731999999940366
+      },
+      {
+        "elapsed_s": 11.203,
+        "cpu_pct": 44.0172727270398
+      },
+      {
+        "elapsed_s": 11.313,
+        "cpu_pct": 3.3950000000494036
+      },
+      {
+        "elapsed_s": 11.407,
+        "cpu_pct": 3.1820000000463042
+      },
+      {
+        "elapsed_s": 11.532,
+        "cpu_pct": 3.0318181818021386
+      },
+      {
+        "elapsed_s": 11.625,
+        "cpu_pct": 3.3139999999276624
+      },
+      {
+        "elapsed_s": 11.75,
+        "cpu_pct": 2.886363636443822
+      },
+      {
+        "elapsed_s": 11.828,
+        "cpu_pct": 3.335999999927182
+      },
+      {
+        "elapsed_s": 11.922,
+        "cpu_pct": 33.85500000049266
+      },
+      {
+        "elapsed_s": 12.032,
+        "cpu_pct": 16.666999999636197
+      },
+      {
+        "elapsed_s": 12.141,
+        "cpu_pct": 3.295454545546096
+      },
+      {
+        "elapsed_s": 12.235,
+        "cpu_pct": 45.434999999008255
+      },
+      {
+        "elapsed_s": 12.344,
+        "cpu_pct": 3.450000000050204
+      },
+      {
+        "elapsed_s": 12.438,
+        "cpu_pct": 2.7263636363492094
+      },
+      {
+        "elapsed_s": 12.547,
+        "cpu_pct": 3.138999999931482
+      },
+      {
+        "elapsed_s": 12.657,
+        "cpu_pct": 3.2430000000471915
+      },
+      {
+        "elapsed_s": 12.75,
+        "cpu_pct": 2.739999999985501
+      },
+      {
+        "elapsed_s": 12.86,
+        "cpu_pct": 3.4350000000499863
+      },
+      {
+        "elapsed_s": 12.953,
+        "cpu_pct": 2.99799999993456
+      },
+      {
+        "elapsed_s": 13.063,
+        "cpu_pct": 2.888181818262055
+      },
+      {
+        "elapsed_s": 13.172,
+        "cpu_pct": 36.86299999919536
+      },
+      {
+        "elapsed_s": 13.266,
+        "cpu_pct": 3.0900000000449652
+      },
+      {
+        "elapsed_s": 13.375,
+        "cpu_pct": 2.5309090908956984
+      },
+      {
+        "elapsed_s": 13.469,
+        "cpu_pct": 2.816000000040978
+      },
+      {
+        "elapsed_s": 13.594,
+        "cpu_pct": 3.2399999999292772
+      },
+      {
+        "elapsed_s": 13.688,
+        "cpu_pct": 5.284545454517491
+      }
+    ],
+    "cpu_sampling_target_seconds": 0.1,
+    "warmup_sql_calls": 5,
+    "repeated_missing_ids": 5,
+    "negative_ttl_seconds": 15,
+    "verified": {
+      "creation_invalidates_404": true,
+      "ttl_expiration": true,
+      "redis_outage_fallback": true
+    },
+    "dataset_initial_licenses": 2000
+  }
+]

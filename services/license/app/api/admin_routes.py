@@ -1,10 +1,11 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request, Response, Path
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.shared.database import get_db
 from app.domain.schemas import GeneratePurchaseDTO, UpdateLicenseDTO
 from app.application.service import LicenseService
 from app.application.jwt_utils import get_admin_user_id
+from app.shared.exceptions import DomainException, global_exception_handler
 
 router = APIRouter(prefix="/api/v1/license", tags=["Admin Panel"])
 
@@ -37,9 +38,25 @@ async def admin_find_licenses(
     return {"status": "success", "data": result}
 
 @router.get("/{license_id}", description="Get a specific license by ID")
-async def admin_get_license(license_id: int, admin_id: int = Depends(get_admin_user_id), db: AsyncSession = Depends(get_db)):
+async def admin_get_license(request: Request, response: Response, license_id: int = Path(ge=1, le=2147483647), admin_id: int = Depends(get_admin_user_id), db: AsyncSession = Depends(get_db)):
     service = LicenseService(db)
-    result = await service.admin_get_license(license_id)
+    cache = getattr(request.app.state, 'negative_license_cache', None)
+    if cache is None or not cache.enabled:
+        result = await service.admin_get_license(license_id)
+        return {"status": "success", "data": result}
+    async def lookup():
+        try:
+            return await service.admin_get_license(license_id)
+        except DomainException as exc:
+            if exc.status_code == 404 and exc.error_code == 'NOT_FOUND':
+                return None
+            raise
+    result, source = await cache.read(license_id, lookup)
+    response.headers['X-Negative-Cache'] = source
+    if result is None:
+        response = await global_exception_handler(request, DomainException('License not found', 404, 'NOT_FOUND'))
+        response.headers['X-Negative-Cache'] = source
+        return response
     return {"status": "success", "data": result}
 
 @router.patch("/{license_id}", description="Update license status, owner, duration, amount, reset limits, or max devices")

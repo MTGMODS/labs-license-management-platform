@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="340" viewBox="0 0 800 340">
+<rect width="100%" height="100%" fill="white"/>
+<text x="55" y="25" font-family="sans-serif" font-size="17">Завершені бізнес SELECT у часі</text>
+<path d="M55 55 V275 H755" fill="none" stroke="#94a3b8"/>
+<text x="55" y="45" font-family="sans-serif" font-size="12">SELECT/s; max 20.7</text>
+<text x="620" y="297" font-family="sans-serif" font-size="12">Час, 0–14.4 s</text>
+<polyline points="91.4,275.0 145.2,275.0 194.5,275.0 258.2,275.0 311.3,275.0 360.6,65.0 428.1,253.1 479.7,275.0 539.6,275.0 588.9,275.0 641.2,275.0 695.1,275.0 744.4,275.0" fill="none" stroke="#ef4444" stroke-width="2"/>
+<text x="55" y="325" fill="#ef4444" font-family="sans-serif" font-size="13">Синхронний TTL</text>
+<polyline points="83.8,275.0 136.2,275.0 186.2,275.0 243.9,249.3 301.5,223.7 354.6,228.6 422.9,238.9 475.9,228.6 544.2,275.0 596.5,275.0 654.1,275.0 705.7,275.0 755.0,275.0" fill="none" stroke="#16a34a" stroke-width="2"/>
+<text x="405" y="325" fill="#16a34a" font-family="sans-serif" font-size="13">TTL jitter</text>
+</svg>

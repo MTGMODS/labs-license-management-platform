@@ -10,6 +10,7 @@ from app.shared.database import engine, Base
 from app.shared.config import settings
 from app.infrastructure.stats_cache import PublicStatsCache
 from app.infrastructure.cache_aside import CacheAsideStats, STATS_KEY
+from app.infrastructure.negative_cache import NegativeLicenseCache
 from redis.exceptions import RedisError
 from fastapi.responses import JSONResponse
 from app.shared import datetime_utils as _datetime_utils  # noqa: F401 - register UTC JSON encoder
@@ -27,6 +28,8 @@ from app.api.bot_routes import router as bot_routes
 async def lifespan(app: FastAPI):
     if settings.STATS_CACHE_ASIDE and settings.RUN_EXPIRY_WORKER:
         raise RuntimeError("Lab 4 strict cache requires RUN_EXPIRY_WORKER=false; HTTP mutations own invalidation")
+    if settings.NEGATIVE_CACHE_ENABLED and not settings.STATS_CACHE_ASIDE:
+        raise RuntimeError("Negative cache requires strict shared mutation fencing")
     if settings.INITIALIZE_SCHEMA:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
@@ -47,6 +50,8 @@ async def lifespan(app: FastAPI):
     else:
         cache = PublicStatsCache.from_url(settings.REDIS_URL, "mtgmods:license:public_stats:v1")
     app.state.public_stats_cache = cache
+    app.state.negative_license_cache = NegativeLicenseCache(
+        cache.redis, settings.NEGATIVE_CACHE_TTL_SECONDS, settings.NEGATIVE_CACHE_ENABLED)
     try:
         yield
     finally:
@@ -123,6 +128,9 @@ app.include_router(user_router)
 app.include_router(stats_router)
 app.include_router(admin_router)
 app.include_router(bot_routes)
+if settings.LAB8_EXPERIMENTS_ENABLED:
+    from app.api.lab8_routes import router as lab8_router
+    app.include_router(lab8_router)
 
 @app.get("/health/live", tags=["System"])
 async def liveness_check():
