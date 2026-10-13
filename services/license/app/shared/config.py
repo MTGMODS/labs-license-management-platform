@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     STATS_LAB_GENERATION_DELAY_MS: int = 0
     STATS_LAB_INSTRUMENT: bool = False
     STATS_CACHE_REDIS_TIMEOUT_SECONDS: float = 0.5
+    NEGATIVE_CACHE_ENABLED: bool = False
+    NEGATIVE_CACHE_TTL_SECONDS: int = 15
+    LAB8_EXPERIMENTS_ENABLED: bool = False
+    LAB8_AGGREGATE_TTL_SECONDS: int = 30
+    LAB8_AGGREGATE_JITTER_SECONDS: int = 0
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
