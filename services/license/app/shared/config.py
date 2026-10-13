@@ -19,6 +19,11 @@ class Settings(BaseSettings):
     STATS_CACHE_ASIDE: bool = False
     STATS_CACHE_TTL_SECONDS: int = 300
     STATS_CACHE_ENABLED: bool = True
+    STATS_CACHE_COALESCE: bool = True
+    STATS_CACHE_JITTER_SECONDS: int = 0
+    STATS_LAB_GENERATION_DELAY_MS: int = 0
+    STATS_LAB_INSTRUMENT: bool = False
+    STATS_CACHE_REDIS_TIMEOUT_SECONDS: float = 0.5
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

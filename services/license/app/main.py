@@ -36,9 +36,14 @@ async def lifespan(app: FastAPI):
         expiry_task = asyncio.create_task(check_expired_licenses_task())
 
     if settings.STATS_CACHE_ASIDE:
-        cache = CacheAsideStats.from_url(settings.REDIS_URL, STATS_KEY)
+        cache = CacheAsideStats.from_url(settings.REDIS_URL, STATS_KEY,
+                                         timeout_seconds=settings.STATS_CACHE_REDIS_TIMEOUT_SECONDS)
         cache.ttl = max(1, settings.STATS_CACHE_TTL_SECONDS)
         cache.enabled = settings.STATS_CACHE_ENABLED
+        cache.coalesce = settings.STATS_CACHE_COALESCE
+        cache.ttl_jitter_seconds = max(0, settings.STATS_CACHE_JITTER_SECONDS)
+        cache.generation_delay_ms = max(0, settings.STATS_LAB_GENERATION_DELAY_MS)
+        cache.instrument = settings.STATS_LAB_INSTRUMENT
     else:
         cache = PublicStatsCache.from_url(settings.REDIS_URL, "mtgmods:license:public_stats:v1")
     app.state.public_stats_cache = cache
