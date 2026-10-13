@@ -219,13 +219,14 @@ python load-tests/report.py load-tests/results/my-run
 з окремою synthetic DB і не приймає production URL; повторні прогони
 зберігаються у нових директоріях результатів.
 
-## Часткова інженерія стійкості ІВСАВПЗ №8
+## Інженерія стійкості ІВСАВПЗ №8
 
-Виконано пункти 2.1/2.2/2.4/2.5/2.7: cold burst 500 VUs, Cache Stampede,
-distributed lock, TTL jitter і порівняльні SQL/latency метрики. Реально виміряно
+Виконано пункти 2.1–2.7: cold burst 500 VUs, Cache Stampede, Cache Avalanche,
+distributed lock, TTL jitter, Negative Caching і порівняльні SQL/latency метрики. Реально виміряно
 500→1 computations, 5500→11 business SELECT, 0% HTTP-помилок.
-Avalanche benchmark і negative caching ще не виконані; це не повна №8.
-Звіт та відтворення: [docs/highload-lab8-partial.md](docs/highload-lab8-partial.md).
+24-key avalanche має SQL/CPU/latency timelines до й після jitter; missing-ID
+benchmark демонструє 404 без повторних SQL і інвалідацію після створення об'єкта.
+Звіт та відтворення: [docs/highload-lab8.md](docs/highload-lab8.md).
 
 ## Лабораторна робота з оркестрації Kubernetes
 

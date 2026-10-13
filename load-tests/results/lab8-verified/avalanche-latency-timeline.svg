@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="340" viewBox="0 0 800 340">
+<rect width="100%" height="100%" fill="white"/>
+<text x="55" y="25" font-family="sans-serif" font-size="17">Затримка за односекундними вікнами</text>
+<path d="M55 55 V275 H755" fill="none" stroke="#94a3b8"/>
+<text x="55" y="45" font-family="sans-serif" font-size="12">p99 ms; max 678.9</text>
+<text x="620" y="297" font-family="sans-serif" font-size="12">Час, 0–11.0 s</text>
+<polyline points="55.0,242.4 118.6,252.4 182.3,228.0 245.9,255.2 309.5,76.9 373.2,65.0 436.8,240.6 500.5,251.6 564.1,245.8 627.7,245.1 691.4,202.6 755.0,246.5" fill="none" stroke="#ef4444" stroke-width="2"/>
+<text x="55" y="325" fill="#ef4444" font-family="sans-serif" font-size="13">Синхронний TTL</text>
+<polyline points="55.0,240.6 118.6,245.8 182.3,240.9 245.9,232.9 309.5,217.5 373.2,212.6 436.8,214.0 500.5,252.0 564.1,241.4 627.7,247.0 691.4,237.4 755.0,244.1" fill="none" stroke="#16a34a" stroke-width="2"/>
+<text x="405" y="325" fill="#16a34a" font-family="sans-serif" font-size="13">TTL jitter</text>
+</svg>
