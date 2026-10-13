@@ -22,7 +22,7 @@ jobs:
             tests: tests/system/test_user.py
           - component: license
             path: services/license
-            tests: tests/system/test_license.py tests/system/test_expiry_worker.py tests/system/test_license_cache.py tests/test_load_baseline.py
+            tests: tests/system/test_license.py tests/system/test_expiry_worker.py tests/system/test_license_cache.py tests/system/test_license_negative_cache.py tests/test_load_baseline.py tests/test_cache_resilience_report.py
           - component: usage
             path: services/usage
             tests: tests/system/test_usage.py
@@ -61,9 +61,10 @@ jobs:
       - name: Validate load-testing tools
         if: matrix.component == 'license'
         run: |
-          python -m ruff check load-tests tests/test_load_baseline.py
+          python -m ruff check load-tests tests/test_load_baseline.py tests/test_cache_resilience_report.py
           docker run --rm -v "$PWD/load-tests:/tests:ro" grafana/k6:1.0.0 inspect /tests/baseline.js
           docker run --rm -v "$PWD/load-tests:/tests:ro" grafana/k6:1.0.0 inspect /tests/stampede.js
+          docker run --rm -v "$PWD/load-tests:/tests:ro" grafana/k6:1.0.0 inspect /tests/cache_resilience.js
 
   web:
     name: Web

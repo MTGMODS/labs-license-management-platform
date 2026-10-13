@@ -122,6 +122,12 @@ async def test_lab_routes_disabled_by_default(api):
     assert (await api.get('/api/v1/lab8/aggregate/0')).status_code == 404
 
 
+async def test_lookup_id_range_is_bounded_before_sql(api, caches, component):
+    for identifier in (0, -1, 2147483648):
+        response = await api.get(f'/api/v1/license/{identifier}', headers=admin(component))
+        assert response.status_code == 422
+
+
 async def test_negative_mode_requires_mutation_fencing(component, monkeypatch):
     main = component('app.main')
     monkeypatch.setattr(main.settings, 'NEGATIVE_CACHE_ENABLED', True)
