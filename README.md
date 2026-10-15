@@ -183,6 +183,11 @@ docker compose -f docker-compose.scaling.yml up --build -d
 
 ## Розподілене кешування ІВСАВПЗ №4
 
+Звіти [№4](docs/highload-lab4.md), [№5](docs/highload-lab5.md) та
+[№8](docs/highload-lab8.md) оформлені за пунктами завдань: просте пояснення,
+готові PowerShell-команди й очікуваний результат. Детальні алгоритми та
+початкові вимірювання винесено в окремі `highload-lab*-technical.md`.
+
 На основі горизонтального масштабування реалізовано окремий строгий Cache-Aside
 режим License Service: спільний Redis, TTL, заголовки HIT/MISS/BYPASS,
 revision-fenced інвалідація після HTTP-мутацій і fallback читання до PostgreSQL.
