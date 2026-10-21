@@ -1,5 +1,16 @@
 # Helm-чарт MTG MODS License Service
 
+## GitOps-профіль DevOps №5
+
+`values-minikube.yaml` використовує зовнішній Secret і вмикає `gitops.enabled`.
+Argo CD розгортає інфраструктуру у wave 0, DB-init Sync hook у wave 1, API у
+wave 2. `gitops.schemaImageTag` фіксує перевірений образ ініціалізації БД
+незалежно від навчального оновлення/пошкодження тегу API. Helm pre-upgrade і
+test hooks у цьому профілі вимкнено. Стандартні dev/prod профілі ЛР4 не змінені.
+Докладніше: [DevOps №5](../../docs/devops-lab5.md).
+
+## Звичайне використання Helm
+
 Чарт пакує License Service, PostgreSQL, Redis, постійне сховище, конфігурацію та
 опціональний Ingress, реалізовані Kubernetes-маніфестами лабораторної роботи №3.
 
