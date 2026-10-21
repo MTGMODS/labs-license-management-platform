@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/MTGMODS/labs-license-management-platform.git
-    targetRevision: codex/devops-lab5-gitops
+    targetRevision: main
     path: helm/mtgmods-license
     helm:
       valueFiles:
