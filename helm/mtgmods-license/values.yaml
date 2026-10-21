@@ -91,3 +91,8 @@ hooks:
 
 tests:
   enabled: true
+
+gitops:
+  enabled: false
+  schemaImageTag: ""
+  progressDeadlineSeconds: 90

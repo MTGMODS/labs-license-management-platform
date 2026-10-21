@@ -4,8 +4,15 @@ metadata:
   name: {{ include "mtgmods-license.fullname" . }}
   labels:
     {{- include "mtgmods-license.labels" . | nindent 4 }}
+  {{- if .Values.gitops.enabled }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  {{- if .Values.gitops.enabled }}
+  progressDeadlineSeconds: {{ .Values.gitops.progressDeadlineSeconds }}
+  {{- end }}
   revisionHistoryLimit: 5
   strategy:
     type: RollingUpdate
@@ -17,6 +24,10 @@ spec:
       {{- include "mtgmods-license.componentLabels" (dict "Release" .Release "Chart" .Chart "Values" .Values "component" "api") | nindent 6 }}
   template:
     metadata:
+      {{- if .Values.gitops.enabled }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      {{- end }}
       labels:
         {{- include "mtgmods-license.componentLabels" (dict "Release" .Release "Chart" .Chart "Values" .Values "component" "api") | nindent 8 }}
     spec:

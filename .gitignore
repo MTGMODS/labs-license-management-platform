@@ -24,4 +24,5 @@ web/dist-ssr/
 .coverage
 htmlcov/
 test-results/
+.local/
 web/coverage/

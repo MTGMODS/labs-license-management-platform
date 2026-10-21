@@ -1,9 +1,15 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "mtgmods-license.fullname" . }}-db-init-{{ .Release.Revision }}
+  name: {{ include "mtgmods-license.fullname" . }}-db-init-{{ if .Values.gitops.enabled }}sync{{ else }}{{ .Release.Revision }}{{ end }}
   labels:
     {{- include "mtgmods-license.labels" . | nindent 4 }}
+  {{- if .Values.gitops.enabled }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+  {{- end }}
 spec:
   ttlSecondsAfterFinished: 600
   backoffLimit: 6
@@ -25,7 +31,7 @@ spec:
                 name: {{ include "mtgmods-license.secretName" . }}
       containers:
         - name: schema-init
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.image.repository }}:{{ if .Values.gitops.enabled }}{{ required "gitops.schemaImageTag is required in GitOps mode" .Values.gitops.schemaImageTag }}{{ else }}{{ .Values.image.tag }}{{ end }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["python", "db_init.py"]
           envFrom:

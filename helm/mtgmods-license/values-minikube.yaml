@@ -1,0 +1,26 @@
+fullnameOverride: mtgmods-license
+replicaCount: 2
+
+image:
+  repository: ghcr.io/mtgmods/labs-license-management-platform-license
+  tag: sha-805ca0af230d9ece135982527f3c69ba6ca231b0
+  pullPolicy: IfNotPresent
+
+config:
+  appVersion: devops-lab5-v1
+
+secrets:
+  create: false
+  existingSecret: mtgmods-license-secrets
+
+hooks:
+  preUpgradeCheck:
+    enabled: false
+
+tests:
+  enabled: false
+
+gitops:
+  enabled: true
+  schemaImageTag: sha-b200fa774adfe73da92ea630f25b6e399c3beb43
+  progressDeadlineSeconds: 90

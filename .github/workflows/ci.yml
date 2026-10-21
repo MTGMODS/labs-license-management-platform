@@ -10,6 +10,46 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    name: Detect image changes
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.paths.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Filter deployment-only changes
+        id: paths
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [[ -z "$BASE_SHA" || "$BASE_SHA" =~ ^0+$ ]]; then
+            echo 'image=true' >> "$GITHUB_OUTPUT"
+          else
+            git diff --name-only "$BASE_SHA" HEAD > "$RUNNER_TEMP/changed-paths.txt"
+            if grep -qvE '^(bootstrap/|argocd-apps/|helm/|docs/|README\.md$)' "$RUNNER_TEMP/changed-paths.txt"; then
+              echo 'image=true' >> "$GITHUB_OUTPUT"
+            else
+              echo 'image=false' >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+  gitops:
+    name: GitOps manifests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: azure/setup-helm@v4.3.1
+        with:
+          version: v3.20.0
+      - run: python -m pip install pytest==9.0.1 PyYAML==6.0.3
+      - run: python -m pytest tests/test_gitops.py -q
+
   python:
     name: Python / ${{ matrix.component }}
     runs-on: ubuntu-latest
@@ -90,7 +130,7 @@ jobs:
 
   image-build:
     name: Build image / ${{ matrix.component }}
-    needs: [python, web]
+    needs: [python, web, changes]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -113,6 +153,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build image locally (no registry push)
+        if: needs.changes.outputs.image == 'true'
         shell: bash
         run: |
           for attempt in 1 2 3; do
@@ -123,12 +164,16 @@ jobs:
             sleep $((attempt * 10))
           done
       - name: Verify image exists
+        if: needs.changes.outputs.image == 'true'
         run: docker image inspect 'lab-${{ matrix.component }}:ci' --format '{{.Id}}'
+      - name: Deployment-only change (required check still reported)
+        if: needs.changes.outputs.image != 'true'
+        run: echo 'No application or Dockerfile changes; image build is not needed.'
 
   publish:
     name: Publish image / ${{ matrix.component }}
-    if: github.event_name == 'push'
-    needs: [python, web, image-build]
+    if: github.event_name == 'push' && needs.changes.outputs.image == 'true'
+    needs: [python, web, image-build, changes]
     runs-on: ubuntu-latest
     permissions:
       contents: read
