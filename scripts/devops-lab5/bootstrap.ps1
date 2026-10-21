@@ -30,8 +30,11 @@ kubectl --context $Profile create namespace argocd --dry-run=client -o yaml | ku
 kubectl --context $Profile apply -n argocd --server-side --force-conflicts -f "https://raw.githubusercontent.com/argoproj/argo-cd/$argoVersion/manifests/install.yaml"
 
 # Local-only HTTP UI. The port-forward binds to loopback, not the LAN.
-kubectl --context $Profile -n argocd patch configmap argocd-cmd-params-cm --type merge -p '{"data":{"server.insecure":"true"}}'
-kubectl --context $Profile -n argocd rollout restart deployment/argocd-server
+$serverConfig = kubectl --context $Profile -n argocd get configmap argocd-cmd-params-cm -o json | ConvertFrom-Json
+if ($serverConfig.data.'server.insecure' -ne 'true') {
+    kubectl --context $Profile -n argocd patch configmap argocd-cmd-params-cm --type merge -p '{"data":{"server.insecure":"true"}}'
+    kubectl --context $Profile -n argocd rollout restart deployment/argocd-server
+}
 kubectl --context $Profile -n argocd rollout status deployment/argocd-server --timeout=180s
 kubectl --context $Profile -n argocd rollout status deployment/argocd-repo-server --timeout=180s
 kubectl --context $Profile -n argocd rollout status statefulset/argocd-application-controller --timeout=180s
@@ -53,8 +56,11 @@ if ('mtgmods-license-secrets' -notin $existingSecrets.items.metadata.name) {
 }
 
 if (-not (Get-NetTCPConnection -LocalPort 18090 -State Listen -ErrorAction SilentlyContinue)) {
+    $serverPods = kubectl --context $Profile -n argocd get pods -l app.kubernetes.io/name=argocd-server -o json | ConvertFrom-Json
+    $serverPod = ($serverPods.items | Where-Object { -not $_.metadata.deletionTimestamp -and ($_.status.conditions | Where-Object type -eq 'Ready').status -eq 'True' } | Select-Object -First 1).metadata.name
+    if (-not $serverPod) { throw 'No ready Argo CD server pod' }
     Start-Process -FilePath (Get-Command kubectl).Source -WindowStyle Hidden `
-        -ArgumentList "--context $Profile -n argocd port-forward svc/argocd-server 18090:80 --address 127.0.0.1" `
+        -ArgumentList "--context $Profile -n argocd port-forward pod/$serverPod 18090:8080 --address 127.0.0.1" `
         -RedirectStandardOutput (Join-Path $localDir 'argocd-port-forward.log') `
         -RedirectStandardError (Join-Path $localDir 'argocd-port-forward-error.log') | Out-Null
 }
@@ -72,15 +78,15 @@ $credentialFile = Join-Path $localDir 'argocd-admin.clixml'
 if (-not (Test-Path -LiteralPath $credentialFile)) {
     $initialSecret = kubectl --context $Profile -n argocd get secret argocd-initial-admin-secret -o json | ConvertFrom-Json
     $initialPassword = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($initialSecret.data.password))
-    $newPassword = [guid]::NewGuid().ToString('N') + [guid]::NewGuid().ToString('N')
-    & $cli login 127.0.0.1:18090 --plaintext --username admin --password $initialPassword
+    $newPassword = [guid]::NewGuid().ToString('N')
+    & $cli login 127.0.0.1:18090 --plaintext --grpc-web --skip-test-tls --username admin --password $initialPassword
     & $cli account update-password --current-password $initialPassword --new-password $newPassword
     $credential = [pscredential]::new('admin', (ConvertTo-SecureString $newPassword -AsPlainText -Force))
     $credential | Export-Clixml -LiteralPath $credentialFile
     kubectl --context $Profile -n argocd delete secret argocd-initial-admin-secret
 } else {
     $credential = Import-Clixml -LiteralPath $credentialFile
-    & $cli login 127.0.0.1:18090 --plaintext --username admin --password $credential.GetNetworkCredential().Password
+    & $cli login 127.0.0.1:18090 --plaintext --grpc-web --skip-test-tls --username admin --password $credential.GetNetworkCredential().Password
 }
 
 if (-not $SkipRoot) {

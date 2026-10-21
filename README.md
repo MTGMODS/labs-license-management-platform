@@ -260,6 +260,18 @@ helm lint helm/mtgmods-license
 helm upgrade --install lab-license helm/mtgmods-license -n mtgmods-helm -f helm/mtgmods-license/values-dev.yaml --wait --wait-for-jobs
 ```
 
+## GitOps через Argo CD — DevOps №5
+
+Кореневий Application читає `argocd-apps/` і розгортає наявний Helm-чарт у
+виділеному Minikube-профілі. Зовнішній Secret не зберігається у Git; оновлення,
+self-healing і відкат виконуються через Git без ручного `helm upgrade`.
+Пункти роботи, запуск, команди демонстрації та результати:
+[docs/devops-lab5.md](docs/devops-lab5.md).
+
+```powershell
+.\scripts\devops-lab5\bootstrap.ps1
+```
+
 ## License
 
 MIT — see `LICENSE` in the repository root.
