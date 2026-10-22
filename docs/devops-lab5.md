@@ -1,238 +1,212 @@
-# DevOps №5 — GitOps через Argo CD
+# Лабораторна робота №5 — GitOps через Argo CD
+
+Розгортання License Service переведено під керування Argo CD: конфігурація з Git автоматично застосовується до Kubernetes. Реалізовано App of Apps, оновлення образу, виявлення дрейфу, self-healing та відкат комітом.
+
+Команди для **Windows CMD** з кореня `C:\MTGMODS\labs-license-management-platform`. Потрібні Git, PowerShell 7 (`pwsh`), Docker Desktop Linux containers, Minikube, kubectl та Helm. Кластер потребує 4 CPU / 6 GiB RAM; навантажувальні стенди Highload мають бути зупинені. Код застосунку та production не змінюються.
 
 ## 1. Репозиторій конфігурації
 
-Бажаний стан кластера зберігається в тому самому репозиторії, що й застосунок.
-`bootstrap/root.yaml` описує кореневий Application `mtgmods-root`, який читає
-каталог `argocd-apps/`. Дочірній Application `mtgmods-license` використовує
-наявний чарт `helm/mtgmods-license` та `values-minikube.yaml`. Другу копію чарта
-не створено; матеріали DevOps №3–4 і Highload залишаються придатними до запуску.
+Конфігурація зберігається поряд із застосунком: [bootstrap/root.yaml](../bootstrap/root.yaml) читає `argocd-apps/`; [argocd-apps/license.yaml](../argocd-apps/license.yaml) використовує наявний [Helm-чарт](../helm/mtgmods-license) і [values-minikube.yaml](../helm/mtgmods-license/values-minikube.yaml). Обидва Application стежать за `main`.
 
-Після злиття PR обидва Application стежать за `main`. Зміни проходять шлях
-**гілка → Pull Request → CI → merge → Argo CD**. Для перевірки до merge
-обидва `targetRevision` тимчасово можуть вказувати на тестову гілку.
+**Шлях зміни: гілка → PR → CI → merge у main → Argo CD.** Після кожного `git push` у командах нижче потрібно створити PR і злити його після зелених перевірок. Посилання `compare` відкриває потрібну гілку. До merge конфігурація кластера не змінюється.
 
-Паролі генеруються локально й потрапляють у зовнішній Kubernetes Secret.
-GitOps-профіль задає `secrets.create: false` та `secrets.existingSecret`.
-Стандартні навчальні placeholders із `values.yaml` у цьому профілі не
-рендеряться в Secret і не використовуються як реальні облікові дані.
+Паролі генеруються локально в Kubernetes Secret; `secrets.existingSecret` виключає їх із рендерингу чарта. CI перевіряє GitOps-маніфести, але не збирає образи для змін лише deployment-файлів і документації: [ci.yml:19](../.github/workflows/ci.yml#L19).
 
-Зміни лише в `bootstrap/`, `argocd-apps/`, `helm/`, `docs/` і README не
-запускають складання/публікацію образів. При цьому сім jobs `Build image / ...`
-виконують успішний крок без збірки: їхні назви не зникають із required checks.
-Python/Web перевірки й окремий job `GitOps manifests` залишаються активними.
+## 2. Образ застосунку та версія
 
-## 2. Образи та версія застосунку
+Образи публічні в `ghcr.io/mtgmods/labs-license-management-platform-license`, кластер завантажує їх без `minikube image load`. Зафіксовані дві версії:
 
-Використовуються публічні образи GHCR, опубліковані CI з DevOps №2.
-`image.tag` — конкретний `sha-<commit>`, не `latest`. Minikube завантажує
-образ із реєстру; ручний `minikube image load` не потрібний.
+- **v1:** `sha-805ca0af230d9ece135982527f3c69ba6ca231b0`.
+- **v2:** `sha-07f44c2e07c73ad805d978dedb06ca231f3f8850`.
 
-Поле `version` уже є у `/health`: `config.appVersion` потрапляє в ConfigMap
-як `APP_VERSION`. Checksum конфігурації у Pod template забезпечує рестарт API
-при зміні цього значення. Це мітка розгортання; образ окремо перевіряється
-через Pod spec/imageID.
-
-Початкова версія використовує образ
-`sha-805ca0af230d9ece135982527f3c69ba6ca231b0`.
-Для наступної береться новий образ після успішної CI-публікації.
+`config.appVersion` задає поле `version` у `/health` через [configmap.yaml:8](../helm/mtgmods-license/templates/configmap.yaml#L8). Це видима версія розгортання; фактичний образ перевіряється окремо. `checksum/config` у [deployment.yaml:29](../helm/mtgmods-license/templates/deployment.yaml#L29) запускає rollout після зміни конфігурації.
 
 ## 3. Встановлення Argo CD
 
-Потрібні PowerShell 7, Docker Desktop (Linux containers), Minikube,
-kubectl і Helm. Окремий профіль `mtgmods-devops5` має 4 CPU, 6 GiB RAM
-і Kubernetes 1.35.1. Попередній Minikube-профіль не видаляється.
-Production Compose та боти не запускаються.
-
-З кореня репозиторію після злиття PR:
-
-```powershell
-.\scripts\devops-lab5\bootstrap.ps1
-$env:PATH = "$env:LOCALAPPDATA\Programs\ArgoCD;$env:PATH"
-kubectl config use-context mtgmods-devops5
+```cmd
+cd /d C:\MTGMODS\labs-license-management-platform
+pwsh -NoProfile -ExecutionPolicy Bypass -File scripts\devops-lab5\bootstrap.ps1 < NUL
+set "PATH=%LOCALAPPDATA%\Programs\ArgoCD;%PATH%"
+set "K=kubectl --context mtgmods-devops5"
+set "REPO=https://github.com/MTGMODS/labs-license-management-platform"
 argocd version --client
-kubectl -n argocd get pods
+%K% -n argocd get pods
+pwsh -NoProfile -Command "(Import-Clixml '.local/devops5/argocd-admin.clixml').GetNetworkCredential().Password | Set-Clipboard"
 ```
 
-Скрипт встановлює Argo CD **3.5.6**, перевіряє SHA256 офіційного CLI,
-створює зовнішній Secret, змінює початковий admin-пароль, видаляє initial
-admin Secret і застосовує кореневий Application. Повторний запуск не змінює
-паролі наявної PostgreSQL та не видаляє дані.
+[bootstrap.ps1](../scripts/devops-lab5/bootstrap.ps1) створює окремий Minikube-профіль, встановлює Argo CD 3.5.6 та перевірений за SHA256 CLI, створює зовнішній Secret, змінює admin-пароль і видаляє initial Secret. UI — **http://127.0.0.1:18090**, логін `admin`, пароль після останньої команди в буфері обміну.
 
-Інтерфейс: **http://127.0.0.1:18090**, логін `admin`.
-HTTP використовується лише в локальному стенді через loopback port-forward;
-LAN/публічний доступ не відкрито. Для production потрібний TLS.
+На ноуті bootstrap створює власні секрети: `.local/` не переноситься Git, DPAPI-файл пароля з ПК не використовується. Повторний запуск на тому самому ПК зберігає наявні паролі й БД. HTTP дозволений лише через локальний loopback; для production потрібний TLS.
 
-Пароль збережено у Windows DPAPI-зашифрованому файлі для цього користувача.
-Каталог `.local/` виключено з Git. Скопіювати пароль для браузера:
+## 4. App of Apps та початкова синхронізація
 
-```powershell
-$credential = Import-Clixml .local/devops5/argocd-admin.clixml
-Set-Clipboard $credential.GetNetworkCredential().Password
-```
+Bootstrap вручну застосовує лише root Application; дочірній Application і ресурси створює Argo CD. Порядок sync waves: **0** — конфігурація та PostgreSQL/Redis; **1** — DB-init; **2** — два API. DB-init використовує окремий стабільний `gitops.schemaImageTag`.
 
-Якщо port-forward припинився, запустити в окремому терміналі:
-
-```powershell
-kubectl -n argocd port-forward svc/argocd-server 18090:80 --address 127.0.0.1
-```
-
-## 4. App of Apps і перша синхронізація
-
-Єдиний ручний apply конфігурації **застосунку** — `bootstrap/root.yaml`.
-Інсталяція Argo CD і створення зовнішнього Secret — підготовка інфраструктури.
-Дочірній Application та ресурси сервісу створює Argo CD із Git.
-
-```powershell
-argocd app list
+```cmd
 argocd app get mtgmods-root --refresh
 argocd app wait mtgmods-license --sync --health --timeout 300
-kubectl -n mtgmods-gitops get pods,svc,pvc
-helm list -n mtgmods-gitops
+%K% -n mtgmods-gitops get pods,svc,pvc
+helm list -n mtgmods-gitops --kube-context mtgmods-devops5
+%K% -n mtgmods-gitops exec deployment/mtgmods-license -- python -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8000/health').read().decode())" < NUL
+%K% -n mtgmods-gitops get deployment mtgmods-license -o jsonpath="{.spec.template.spec.containers[0].image}"
 ```
 
-Очікується `Synced / Healthy`. У браузері відкрити `mtgmods-root`, потім
-`mtgmods-license`: дерево показує ресурси API, PostgreSQL і Redis.
-`helm list` порожній: Helm рендерить шаблони, життєвим циклом керує Argo CD.
-
-Порядок sync waves: **0** — конфігурація, сховище й PostgreSQL/Redis;
-**1** — ідемпотентний DB-init Sync hook; **2** — два екземпляри API.
-У GitOps вимкнено Helm pre-upgrade health hook, який на першому sync перевіряв
-би ще не існуючий API. Звичайний профіль ЛР4 зберігає попередню поведінку.
-
-`gitops.schemaImageTag` окремо фіксує перевірений образ DB-init. Навчальний
-неіснуючий тег API не повинен зламати hook раніше за Deployment. Для реальної
-зміни схеми в майбутньому потрібно окремо оновити цей тег.
-
-Для HTTP-перевірок запустити в окремому терміналі:
-
-```powershell
-kubectl -n mtgmods-gitops port-forward svc/mtgmods-license 18091:80 --address 127.0.0.1
-```
-
-```powershell
-curl.exe -s http://127.0.0.1:18091/health
-kubectl -n mtgmods-gitops get deployment mtgmods-license -o jsonpath='{.spec.template.spec.containers[0].image}'
-```
+Результат: у UI дерево `mtgmods-root → mtgmods-license`, `Synced / Healthy`, два Ready API, PVC `Bound`; `/health` повертає `UP` і версію. `helm list` порожній: Helm лише рендерить шаблони, життєвим циклом керує Argo CD.
 
 ## 5. Оновлення через Git
 
-У новій гілці змінити `image.tag` у `values-minikube.yaml` на наявний новий
-SHA-тег і `config.appVersion` на `devops-lab5-v2`. `gitops.schemaImageTag`
-для звичайного оновлення API не змінюється.
+Поточний `main` уже містить фінальні `v2` та `selfHeal: true`. Для повторення експерименту спочатку окремим PR відновлюється **v1 / selfHeal false**. `git restore --source` нижче змінює тільки явно вказані файли на зафіксовані навчальні версії, не скидає репозиторій. Робоче дерево перед початком має бути чистим.
 
-```powershell
+```cmd
 git switch main
 git pull --ff-only
-git switch -c codex/devops5-release-demo
-# Відредагувати image.tag та config.appVersion у values-minikube.yaml.
-git add helm/mtgmods-license/values-minikube.yaml
-git commit -m "feat(gitops): release license service v2"
-git push -u origin codex/devops5-release-demo
+set "BRANCH=codex/devops5-prepare-%RANDOM%-%RANDOM%"
+git switch -c %BRANCH%
+git restore --source=1bf4a18 -- helm/mtgmods-license/values-minikube.yaml
+pwsh -NoProfile -Command "$p='argocd-apps/license.yaml'; (Get-Content $p -Raw).Replace('selfHeal: true','selfHeal: false') | Set-Content $p -NoNewline -Encoding utf8"
+git add helm/mtgmods-license/values-minikube.yaml argocd-apps/license.yaml
+git commit -m "test(gitops): prepare v1 without self-healing"
+git push -u origin %BRANCH%
+start "" "%REPO%/compare/main...%BRANCH%?expand=1"
 ```
 
-Створити PR у `main`, дочекатися зелених required checks і злити PR.
-При `targetRevision: main` незлиті зміни іншої гілки не розгортаються.
+**Після merge підготовчого PR:**
 
-```powershell
-argocd app get mtgmods-license --refresh
-argocd app wait mtgmods-license --sync --health --timeout 300
-kubectl -n mtgmods-gitops rollout status deployment/mtgmods-license --timeout=180s
-curl.exe -s http://127.0.0.1:18091/health
-```
-
-Очікуються новий образ і `version: devops-lab5-v2` без ручного `helm upgrade`.
-При заміні pod активний HTTP port-forward може завершитися — тоді повторити
-команду port-forward. Це не означає відмову ClusterIP Service.
-
-## 6. Дрейф, Health і відкат
-
-### 6.1. Без selfHeal
-
-У `argocd-apps/license.yaml` повинно бути `selfHeal: false`. Якщо експеримент
-уже завершено і там `true`, спочатку повернути `false` через Git/PR.
-
-```powershell
-kubectl -n mtgmods-gitops scale deployment mtgmods-license --replicas=3
-argocd app get mtgmods-license --refresh
-kubectl -n mtgmods-gitops get deployment mtgmods-license
-```
-
-Очікується `OutOfSync`: у Git дві репліки, у кластері три. Без нового commit
-і без selfHeal Argo CD не повертає вже синхронізовану конфігурацію автоматично.
-
-### 6.2. Із selfHeal
-
-Через нову гілку/PR змінити дочірній Application на `selfHeal: true`.
-Кореневий Application сам підхопить зміну після merge.
-
-```powershell
+```cmd
 argocd app get mtgmods-root --refresh
 argocd app wait mtgmods-root --sync --timeout 180
-kubectl -n argocd get application mtgmods-license -o jsonpath='{.spec.syncPolicy.automated.selfHeal}'
-kubectl -n mtgmods-gitops scale deployment mtgmods-license --replicas=3
 argocd app get mtgmods-license --refresh
-argocd app wait mtgmods-license --sync --health --timeout 180
-kubectl -n mtgmods-gitops get deployment mtgmods-license
+argocd app wait mtgmods-license --sync --health --timeout 300
+%K% -n mtgmods-gitops exec deployment/mtgmods-license -- python -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8000/health').read().decode())" < NUL
 ```
 
-Очікується автоматичне повернення **3 → 2**, без ручного scale назад.
+Очікується `devops-lab5-v1`. Реліз v2 змінює **і SHA-тег образу, і видиму версію**; схема БД не змінюється:
 
-### 6.3. Synced, але Degraded
-
-У новій гілці змінити лише `image.tag` на `nonexistent-devops-lab5`.
-Зберегти SHA цього commit, запушити та злити PR після CI.
-
-```powershell
-argocd app get mtgmods-license --refresh
-kubectl -n mtgmods-gitops get pods
-kubectl -n mtgmods-gitops describe deployment mtgmods-license
-argocd app get mtgmods-license
-```
-
-Новий pod отримає `ErrImagePull` / `ImagePullBackOff`. Спочатку Health може бути
-`Progressing`, а після `progressDeadlineSeconds: 90` — `Degraded`.
-`Synced` означає відповідність маніфестів Git, а не справність застосунку.
-Старі ready pods можуть залишатися доступними завдяки `maxUnavailable: 0`.
-
-### 6.4. Відкат через git revert
-
-Відкотити саме commit із неправильним тегом, а не стан кластера вручну:
-
-```powershell
+```cmd
 git switch main
 git pull --ff-only
-git log --oneline -10
-git switch -c codex/devops5-revert-demo
-git revert SHA_КОМІТУ_З_НЕІСНУЮЧИМ_ТЕГОМ
-git push -u origin codex/devops5-revert-demo
+set "BRANCH=codex/devops5-release-%RANDOM%-%RANDOM%"
+git switch -c %BRANCH%
+git restore --source=a7dfddb -- helm/mtgmods-license/values-minikube.yaml
+git add helm/mtgmods-license/values-minikube.yaml
+git commit -m "feat(gitops): release license service v2"
+git push -u origin %BRANCH%
+start "" "%REPO%/compare/main...%BRANCH%?expand=1"
 ```
 
-Після злиття revert PR:
+**Після merge релізного PR:**
 
-```powershell
+```cmd
+argocd app get mtgmods-license --refresh
+argocd app wait mtgmods-license --sync --health --timeout 300
+%K% -n mtgmods-gitops exec deployment/mtgmods-license -- python -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8000/health').read().decode())" < NUL
+%K% -n mtgmods-gitops get deployment mtgmods-license -o jsonpath="{.spec.template.spec.containers[0].image}"
+```
+
+Результат: **v2**, новий образ і `Synced / Healthy`. Ручні `helm upgrade` та `kubectl set image` не використовуються.
+
+## 6. Дрейф Health та відкат
+
+### 6a. Без selfHeal та з selfHeal
+
+Після підготовки selfHeal вимкнений, у Git задано 2 репліки. Ручний scale створює дрейф:
+
+```cmd
+%K% -n mtgmods-gitops scale deployment mtgmods-license --replicas=3
+%K% -n mtgmods-gitops rollout status deployment/mtgmods-license --timeout=180s
+argocd app get mtgmods-license --refresh
+```
+
+Результат: **3 Ready, OutOfSync / Healthy**. Увімкнення selfHeal також проходить через Git:
+
+```cmd
+git switch main
+git pull --ff-only
+set "BRANCH=codex/devops5-selfheal-%RANDOM%-%RANDOM%"
+git switch -c %BRANCH%
+git restore --source=a7dfddb -- argocd-apps/license.yaml
+git add argocd-apps/license.yaml
+git commit -m "feat(gitops): enable self-healing"
+git push -u origin %BRANCH%
+start "" "%REPO%/compare/main...%BRANCH%?expand=1"
+```
+
+**Після merge** root застосовує нову політику. Повторна ручна зміна автоматично скасовується:
+
+```cmd
+argocd app get mtgmods-root --refresh
+argocd app wait mtgmods-root --sync --timeout 180
+%K% -n argocd get application mtgmods-license -o jsonpath="{.spec.syncPolicy.automated.selfHeal}"
+%K% -n mtgmods-gitops scale deployment mtgmods-license --replicas=3
+argocd app get mtgmods-license --refresh
+argocd app wait mtgmods-license --sync --health --timeout 180
+%K% -n mtgmods-gitops get deployment mtgmods-license
+```
+
+Очікується `true`, повернення **3 → 2**, `Synced / Healthy` без ручного scale назад.
+
+### 6b. Synced але Degraded
+
+Змінюється лише тег API, стабільний DB-init залишається робочим. `BAD_SHA` автоматично зберігає коміт для наступного revert. Синтаксис `for /f %I` призначений для безпосереднього вставлення в CMD, не для `.bat`.
+
+```cmd
+git switch main
+git pull --ff-only
+set "BRANCH=codex/devops5-bad-image-%RANDOM%-%RANDOM%"
+git switch -c %BRANCH%
+pwsh -NoProfile -Command "$p='helm/mtgmods-license/values-minikube.yaml'; (Get-Content $p -Raw) -replace '(?m)^  tag: .*','  tag: nonexistent-devops-lab5' | Set-Content $p -NoNewline -Encoding utf8"
+git add helm/mtgmods-license/values-minikube.yaml
+git commit -m "test(gitops): demonstrate an unavailable image"
+for /f %I in ('git rev-parse HEAD') do set "BAD_SHA=%I"
+git push -u origin %BRANCH%
+start "" "%REPO%/compare/main...%BRANCH%?expand=1"
+```
+
+**Після merge:**
+
+```cmd
+argocd app get mtgmods-license --refresh
+argocd app wait mtgmods-license --sync --timeout 180
+%K% -n mtgmods-gitops wait deployment/mtgmods-license --for=condition=Progressing=False --timeout=180s
+%K% -n mtgmods-gitops get pods
+argocd app get mtgmods-license --refresh
+```
+
+Новий pod має `ImagePullBackOff`; після deadline 90 s стан — **Synced / Degraded**. Synced означає відповідність маніфестів Git, не працездатність нового образу. Старі Ready pods можуть обслуговувати запити завдяки `maxUnavailable: 0`.
+
+### 6c. Відкат через git revert
+
+```cmd
+git switch main
+git pull --ff-only
+set "BRANCH=codex/devops5-revert-%RANDOM%-%RANDOM%"
+git switch -c %BRANCH%
+git revert --no-commit %BAD_SHA%
+git commit -m "revert(gitops): restore the working image"
+git push -u origin %BRANCH%
+start "" "%REPO%/compare/main...%BRANCH%?expand=1"
+```
+
+**Після merge:**
+
+```cmd
 argocd app get mtgmods-license --refresh
 argocd app wait mtgmods-license --sync --health --timeout 300
 argocd app history mtgmods-license
 git log --oneline -10
-curl.exe -s http://127.0.0.1:18091/health
+%K% -n mtgmods-gitops exec deployment/mtgmods-license -- python -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8000/health').read().decode())" < NUL
 ```
 
-Очікуються `Synced / Healthy` і робочий образ. У history є Git ревізії
-синхронізацій; невдалий rollout не обов'язково буде успішним записом history.
-Причину збою додатково видно в operationState та умовах Deployment.
+Очікуються робочий образ, `UP / v2` і `Synced / Healthy`. Відкочується опис у Git, не кластер вручну; PostgreSQL та PVC не видаляються.
 
-## 7. Лайв-демонстрація
+## 7. Результати перевірки
 
-Порядок: UI та дерево ресурсів → оновлення образу через Git → дрейф без
-selfHeal → автоматичне повернення реплік → неіснуючий тег і `Degraded` →
-git revert і `Healthy`. Фактичний прогін описано в
-[результатах](results/devops-lab5.md).
+Повний експеримент виконано **21.10.2026**: реліз [0de0c8f](https://github.com/MTGMODS/labs-license-management-platform/commit/0de0c8f), selfHeal [44c925c](https://github.com/MTGMODS/labs-license-management-platform/commit/44c925c), неправильний образ [8c1d35b](https://github.com/MTGMODS/labs-license-management-platform/commit/8c1d35b), revert [2839a2b](https://github.com/MTGMODS/labs-license-management-platform/commit/2839a2b). PVC залишився тим самим; у history зафіксовані ревізії синхронізацій. Докази: [початковий Healthy](results/devops-lab5/01-initial-healthy.jpg), [дрейф](results/devops-lab5/02-drift-without-selfheal.jpg), [Degraded](results/devops-lab5/03-synced-degraded.jpg), [відновлення](results/devops-lab5/04-revert-healthy.jpg).
 
-Зупинка без видалення БД: `minikube stop -p mtgmods-devops5`.
-Видалення профілю знищить локальні дані PostgreSQL — це не звичайне завершення демо.
+Перевірки коду — [test_gitops.py](../tests/test_gitops.py): реальний Helm rendering, зовнішній Secret, порядок hooks, незалежний DB-init і збереження CI checks. На ноуті історія кластера створюється заново; збережені докази не замінюють живий показ пунктів 3–6.
 
-Джерела: [Getting started](https://argo-cd.readthedocs.io/en/stable/getting_started/),
-[Helm та hooks](https://argo-cd.readthedocs.io/en/stable/user-guide/helm/),
-[Auto-sync](https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/),
-[App of Apps](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/).
+Зупинка зі збереженням БД:
+
+```cmd
+minikube stop -p mtgmods-devops5
+```

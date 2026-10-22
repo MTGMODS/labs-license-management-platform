@@ -251,12 +251,8 @@ helm upgrade --install lab-license helm/mtgmods-license -n mtgmods-helm -f helm/
 Кореневий Application читає `argocd-apps/` і розгортає наявний Helm-чарт у
 виділеному Minikube-профілі. Зовнішній Secret не зберігається у Git; оновлення,
 self-healing і відкат виконуються через Git без ручного `helm upgrade`.
-Пункти роботи, запуск, команди демонстрації та результати:
+Єдиний звіт за пунктами роботи, посилання на код, команди CMD та результати:
 [docs/devops-lab5.md](docs/devops-lab5.md).
-
-```powershell
-.\scripts\devops-lab5\bootstrap.ps1
-```
 
 ## License
 
