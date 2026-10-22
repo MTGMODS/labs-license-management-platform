@@ -1,210 +1,128 @@
-# Лабораторна №5. Навантажувальне тестування
+# Лабораторна робота №5 — Навантажувальне тестування
 
-**Ідея:** виміряти, скільки система обробляє запитів і коли починає гальмувати.
-№4 додала кеш; №5 вимірює користь кешу та кількох копій сервісу.
+За допомогою k6 виміряно читання, запис і складений сценарій License Service. Порівняно 1/3 API та роботу з кешем/без кешу; зафіксовано затримки, насичення й Performance Baseline.
 
-Команди для **PowerShell**. Виконуй зверху вниз в одному вікні.
-Потрібні Docker Desktop (Linux containers), Python 3.12+ і **щонайменше 8 logical CPU**,
-доступних Docker. Це потрібно через закріплення контейнерів за CPU 0–7.
-Не запускай паралельно вимірювання інших лаб. БД тут лише навчальна й очищається runner-ом.
-Venv необов'язковий: Python керує тестами, а навантаження генерує k6 у Docker.
+## Запуск середовища
 
-## Підготовка — один раз
+Команди для **Windows CMD**, послідовно в одному вікні. Потрібні Python 3.12+, Docker Desktop Linux containers, Compose 2.24.4+ та **8+ logical CPU, доступних Docker**: у конфігурації використовуються CPU 0–7. Інші навантажувальні стенди та Minikube мають бути зупинені. Venv необов'язковий; host runner використовує стандартну бібліотеку Python.
 
-```powershell
-Set-Location C:\MTGMODS\labs-license-management-platform
-$labPython = if (Test-Path .\.venv\Scripts\python.exe) { (Resolve-Path .\.venv\Scripts\python.exe).Path } else { 'python' }
-& $labPython --version
-docker info --format 'OS={{.OSType}}; logical CPU={{.NCPU}}'
-$env:LAB4_CACHE_ENABLED = 'true'
-$env:LAB4_CACHE_TTL_SECONDS = '300'
-$env:LAB5_UPSTREAM_CONFIG = './deploy/horizontal-scaling/upstream-round-robin.conf'
-$lab5Compose = @('-p', 'mtgmods_load_baseline_lab5', '-f', 'docker-compose.scaling.yml', '-f', 'docker-compose.cache.yml', '-f', 'docker-compose.load.yml')
-docker compose @lab5Compose up --build -d
-docker compose @lab5Compose up -d --no-deps --force-recreate scaling-gateway
-docker compose @lab5Compose run --rm --no-deps cache-tools python /load-tests/reset_dataset.py
-docker compose @lab5Compose run --rm --no-deps cache-tools python /lab4/seed.py --rows 2000
+```cmd
+cd /d C:\MTGMODS\labs-license-management-platform
+set "LABPY=python"
+if exist ".venv\Scripts\python.exe" set "LABPY=.venv\Scripts\python.exe"
+"%LABPY%" --version
+docker info --format "OS={{.OSType}}; logical CPU={{.NCPU}}"
+set "LAB4_CACHE_ENABLED=true"
+set "LAB4_CACHE_TTL_SECONDS=300"
+set "LAB5_UPSTREAM_CONFIG=./deploy/horizontal-scaling/upstream-round-robin.conf"
+set "DC5=docker compose -p mtgmods_load_baseline_lab5 -f docker-compose.scaling.yml -f docker-compose.cache.yml -f docker-compose.load.yml"
+%DC5% build license-db-init
+%DC5% up -d --wait --wait-timeout 180
+%DC5% up -d --no-deps --force-recreate scaling-gateway
+%DC5% run --rm -T --no-deps cache-tools python /load-tests/reset_dataset.py < NUL
+%DC5% run --rm -T --no-deps cache-tools python /lab4/seed.py --rows 2000 < NUL
 ```
 
-Очікується `linux`, CPU ≥ 8, три healthy API. Порт цього стенда — `18105`.
-Останні дві команди очищають **тільки навчальну БД №5** і створюють 2000 тестових покупок.
-Не використовуй production `.env` або дані. Якщо запущено №4, спочатку заверши її командою `down` із її звіту.
+Стенд працює на `127.0.0.1:18105`. Reset очищає **лише окрему навчальну БД №5**, seed створює 2000 покупок. Production дані та реальні платежі не використовуються.
 
-## 2.1. Три бізнес-сценарії
+## 2.1. Бізнес-сценарії навантаження
 
-**Що вимагається:** перевірити читання, запис та складений сценарій.
+Реалізовано у [baseline.js:68](../load-tests/baseline.js#L68), функція `exercise`:
 
-**Що зроблено** у [baseline.js](../load-tests/baseline.js), функція `exercise`:
+- **A / read:** GET публічної статистики — читання та серіалізація великих агрегатів.
+- **B / write:** POST створення ліцензії й покупки — транзакції запису.
+- **C / workflow:** створити → знайти → змінити суму → прочитати й перевірити → видалити. Одна ітерація містить 5 HTTP-запитів.
 
-- `read`: GET публічної статистики — багато читань.
-- `write`: POST створення ліцензії та покупки — багато записів у БД.
-- `workflow`: створити → знайти → змінити суму → прочитати й перевірити суму → видалити.
+## 2.2. Конфігурація навантажувального контуру
 
-Один workflow = **5 HTTP-запитів**. Тести не проводять реальних оплат.
-Запуск усіх сценаріїв і порівнянь є в пункті 2.6, не треба запускати кожен вручну.
+[docker-compose.load.yml](../docker-compose.load.yml) задає кожному API 1 CPU / 512 MiB; PostgreSQL — 2 CPU / 768 MiB. k6 працює на окремих logical CPU 6–7, API — 0–2, БД — 3–4. Пул кожного API: 5 основних + до 10 додаткових з'єднань, очікування 30 s. Це ізоляція ресурсів на одному ПК, не окремі фізичні сервери.
 
-## 2.2. Окремий навантажувальний стенд
-
-**Що вимагається:** автоматизований інструмент і відомі CPU/RAM/налаштування.
-
-**Що зроблено:** k6, Nginx, три API, Redis і PostgreSQL у власному Docker-проєкті.
-Кожному API виділено 1 CPU / 512 MiB, БД — 2 CPU / 768 MiB.
-Генератор k6 має окремі logical CPU 6–7, щоб менше заважати самим сервісам.
-Пул БД: 5 основних + до 10 додаткових з'єднань на instance, очікування до 30 s.
-
-**Показати контейнери та ресурси одного API:**
-
-```powershell
-docker compose @lab5Compose ps
-docker inspect mtgmods_load_baseline_lab5-license-service-1-1 --format 'CPU set={{.HostConfig.CpusetCpus}}; NanoCPUs={{.HostConfig.NanoCpus}}; Memory bytes={{.HostConfig.Memory}}'
+```cmd
+%DC5% ps
+docker inspect mtgmods_load_baseline_lab5-license-service-1-1 --format "CPU={{.HostConfig.CpusetCpus}}; NanoCPUs={{.HostConfig.NanoCpus}}; RAM={{.HostConfig.Memory}}"
 ```
 
-Очікується CPU set `0`, NanoCPUs `1000000000` (= 1 CPU), Memory `536870912` (= 512 MiB).
-Конфігурація: [docker-compose.load.yml](../docker-compose.load.yml).
-Це один фізичний ПК з Docker, не кластер окремих серверів.
+Для першого API: `CPU=0`, `NanoCPUs=1000000000`, `RAM=536870912`.
 
-## 2.3. Розігрів і поступове збільшення користувачів
+## 2.3. Warm-up та ступеневе нарощування
 
-**Що вимагається:** спочатку розігріти систему, потім збільшувати навантаження.
+[baseline.js:26](../load-tests/baseline.js#L26) відокремлює warm-up від вимірювань. Повний профіль: розігрів 5 s, потім 1 → 10 → 25 → 50 → 100 → 200 VUs по 8 s. Короткий живий запуск використовує той самий сценарій з меншими тривалостями:
 
-**Що зроблено:** у повному тесті 5 s розігріву, потім 1 → 10 → 25 → 50 → 100 → 200
-одночасних віртуальних користувачів, по 8 s кожен ступінь. Розігрів не входить у підсумкові перцентилі.
-
-**Коротка жива демка:** 2 s розігріву, 1 → 10 → 25 користувачів, по 3 s.
-Між фазами є додаткові паузи; команда не завершиться за 11 секунд.
-
-```powershell
-docker compose @lab5Compose run --rm --no-deps -e 'WORKLOAD=read' -e 'LEVELS=1,10,25' -e 'STAGE_SECONDS=3' -e 'WARMUP_SECONDS=2' k6
+```cmd
+%DC5% run --rm -T --no-deps -e WORKLOAD=read -e LEVELS=1,10,25 -e STAGE_SECONDS=3 -e WARMUP_SECONDS=2 k6 < NUL
 ```
 
-У виводі k6 видно warmup і фази `level_1`, `level_10`, `level_25`.
-Наприкінці `LAB5_RESULT` містить вимірювання кожного ступеня.
-Це коротка демонстрація запуску, **не заміна повного збереженого дослідження**.
+У виводі видно `warmup`, `level_1`, `level_10`, `level_25` та `LAB5_RESULT`. Між фазами є паузи для завершення запитів. Короткий запуск не замінює повний baseline.
 
-## 2.4. Метрики: RPS, середнє, p50/p95/p99, помилки
+## 2.4. Метрики та розподіл затримок
 
-**Що вимагається:** описати швидкість числами, не словами «ніби швидко».
+RPS — завершені HTTP-запити за секунду; Avg — середній час; p50 — медіана; p95/p99 — час, у який вклалися 95%/99% запитів. Хвостові затримки зростають через конкуренцію за CPU й очікування; середнє приховує повільні відповіді.
 
-- RPS — кількість завершених запитів за секунду.
-- Avg — середній час; p50 — медіана.
-- p95 = 250 ms: 95% запитів завершились не довше ніж за 250 ms.
-- p99 показує повільні відповіді, які середнє може приховувати.
-- `error_rate` — частка помилок: 0 = 0%, 0.01 = 1%.
+Нижче — **повний прогін 13.10.2026 на ПК**, не результати поточного ноутбука. Читання, 3 API, теплий Redis; усі значення часу в ms, помилки — %:
 
-**Показати вже виміряний повний прогін:**
-
-```powershell
-Import-Csv .\load-tests\results\lab5\read_three_cached.csv | Select-Object vus, rps, avg_ms, p50_ms, p95_ms, p99_ms, error_rate | Format-Table -AutoSize
-Invoke-Item .\load-tests\results\lab5\read_three_cached-latency.svg
+```text
+VU    RPS     Avg      p50      p95      p99      Помилки
+1     32.09   30.85    27.67    50.03    61.62    0
+10    81.22   120.83   101.27   247.62   367.71   0
+25    80.18   304.14   273.41   549.06   671.34   0
+50    73.62   648.03   607.55   1034.71  1112.24  0
+100   81.02   1135.91  1151.90  1553.58  1741.89  0
+200   79.22   2226.05  2354.76  2846.02  2977.08  0
 ```
 
-Файл і графік — вимірювання 13.10.2026, не щойно запущеної короткої демки.
-Кількість запитів, тривалості та інші сценарії є в [повних результатах](../load-tests/results/lab5/metrics.md).
+Повні таблиці всіх ступенів: [A / read](../load-tests/results/lab5/read_three_cached.csv), [B / write](../load-tests/results/lab5/write_three.csv), [C / workflow](../load-tests/results/lab5/workflow_three.csv). У [report.py:48](../load-tests/report.py#L48) реалізовано побудову CSV/SVG із вимірювань.
 
-## 2.5. Межа насичення та вузьке місце
-
-**Що вимагається:** знайти момент, коли додаткові користувачі вже не збільшують продуктивність.
-
-**Що встановлено у повному прогоні:** на 10 користувачах ≈81 RPS, на 25 — ≈80 RPS.
-При цьому p99 виріс приблизно з 368 до 671 ms. Роботи більше, а система встигає
-приблизно стільки ж — запити чекають довше. Насичення спостерігається між 10 і 25 VUs.
-
-**Показати графік та зафіксований CPU:**
-
-```powershell
-Invoke-Item .\load-tests\results\lab5\read_three_cached-throughput.svg
-$lab5Passport = Get-Content .\load-tests\results\lab5\passport.json -Raw -Encoding UTF8 | ConvertFrom-Json
-$lab5Passport.system_performance_baseline.evidence_peak_cpu_pct | Format-List
+```cmd
+start "" "load-tests\results\lab5\read_three_cached-latency.svg"
+start "" "load-tests\results\lab5\read_three_cached-errors.svg"
 ```
 
-API використовували приблизно 100% виділеного ядра кожен, Redis і БД — значно менше.
-Підтверджене ресурсне обмеження — **CPU застосунку**. Точну повільну функцію без
-окремого профілювання ми не визначали. На іншому ПК межа може відрізнятись.
+## 2.5. Saturation Point та первинне вузьке місце
 
-## 2.6. Порівняння одного/трьох сервісів і з кешем/без кешу
+Між **10 і 25 VU** RPS майже не зріс: 81.22 → 80.18, але p99 виріс 367.71 → 671.34 ms. Це інтервал насичення. У ресурсних вимірюваннях кожен API використовував близько 100% свого ядра, БД — близько 4%, Redis — 10%. Підтверджений bottleneck — **CPU застосунку**; конкретна функція потребує окремого профілювання. Джерело — [passport.json](../load-tests/results/lab5/passport.json).
 
-**Що вимагається:** порівняти конфігурації за однакового профілю навантаження.
-
-**Що зроблено:** Python runner сам запускає 5 режимів:
-три API з кешем; записи; workflow; один API з кешем; три API без кешу.
-У режимі одного API дві інші копії справді зупиняються. Перед кожним режимом
-відновлюються однакові початкові 2000 ліцензій і покупок.
-
-**Скопіюй для нового короткого порівняння всіх режимів:**
-
-```powershell
-$lab5Demo = 'load-tests/results/defense-lab5-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff')
-& $labPython load-tests/run_baseline.py --levels 1,10 --stage-seconds 3 --warmup-seconds 2 --output-dir $lab5Demo
-if ($LASTEXITCODE -ne 0) { throw 'Тест №5 не пройшов: дивись помилку вище' }
-& $labPython load-tests/report.py $lab5Demo
-if ($LASTEXITCODE -ne 0) { throw 'Не вдалося сформувати звіт №5' }
-Get-Content (Join-Path $lab5Demo 'metrics.md') -Encoding UTF8
+```cmd
+start "" "load-tests\results\lab5\read_three_cached-throughput.svg"
 ```
 
-Команда виконає **всі п'ять режимів**, тому це кілька тестів, а не один миттєвий запит.
-Ім'я директорії унікальне — нічого вручну перейменовувати не треба.
-Результати короткого запуску залишаються окремо від початкових повних.
+## 2.6. Контрольні порівняння масштабування та кешу
 
-У початковому повному тесті на 10 VUs: один API з кешем ≈30.59 RPS,
-три з кешем ≈81.22 RPS, три без кешу ≈30.68 RPS.
-Прискорення 1→3 = RPS трьох / RPS одного; ефективність масштабування = це прискорення / 3.
-Розраховані коефіцієнти можна показати так:
+[run_baseline.py:42](../load-tests/run_baseline.py#L42) запускає п'ять режимів з однаковим початковим dataset: A/3 API/cache, B/3 API, C/3 API, A/1 API/cache, A/3 API/no cache. У режимі одного API інші два справді зупиняються. Перед кожним режимом дані відновлюються.
 
-```powershell
-$lab5Passport.comparisons | Where-Object vus -eq 10 | Format-List
+На 10 VU в повному прогоні: 1 API/cache — **30.59 RPS**, 3 API/cache — **81.22**, 3 API/no cache — **30.68**. Прискорення масштабування = 81.22 / 30.59 ≈ **2.66**; ефективність = 2.66 / 3 ≈ **88.5%**. Для кешу p95 знизився **553.77 → 247.62 ms**. Реальні SQL-виклики та CPU збережені в JSON кожного режиму поряд із CSV.
+
+За весь профіль читання без кешу зафіксовано **22272 SQL-виклики / 33357.65 ms** виконання в БД, із кешем — **202 / 16.51 ms**. Це сумарні лічильники, включно зі службовими операціями; кількість завершених HTTP-запитів у режимах різна.
+
+Повтор усіх п'яти режимів із коротким профілем; результати записуються в нову директорію:
+
+```cmd
+set "RUN5=load-tests\results\lab5-run-%RANDOM%-%RANDOM%"
+"%LABPY%" load-tests\run_baseline.py --levels 1,10,25 --stage-seconds 3 --warmup-seconds 2 --output-dir "%RUN5%" < NUL
+dir "%RUN5%\*.json"
 ```
 
-За потреби **повний повтор початкового профілю**, замість короткого:
+Для повного профілю в цій команді використовуються `--levels 1,10,25,50,100,200 --stage-seconds 8 --warmup-seconds 5`. Збережені графіки вище належать початковому повному прогону, нові JSON — поточному запуску.
 
-```powershell
-$lab5Full = 'load-tests/results/full-lab5-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff')
-& $labPython load-tests/run_baseline.py --output-dir $lab5Full
-if ($LASTEXITCODE -ne 0) { throw 'Повний прогін №5 не пройшов' }
-& $labPython load-tests/report.py $lab5Full
+## 2.7. Специфікація Performance Baseline
+
+Картка початкового повного прогону, розрахована в [report.py:9](../load-tests/report.py#L9) та збережена в [passport.json](../load-tests/results/lab5/passport.json):
+
+```text
+Environment:        12 logical CPU / ~16 GiB Docker RAM; 3 API; ресурси з п. 2.2
+Stable throughput:  81.22 RPS для читання статистики з теплим кешем
+Saturation point:   між 10 і 25 VU
+p95 / p99:          247.62 / 367.71 ms під стабільним навантаженням
+Error rate:         0%, також на виявленому порозі насичення
+Critical scenario:  повторні розрахунки статистики без кешу
+Primary bottleneck: CPU застосунку
 ```
 
-## 2.7. Підсумкова картка Performance Baseline
+Прийнятні межі: p95 ≤500 ms, p99 ≤1000 ms, помилки <1%. Картка описує цей стенд, не production SLA. На ноуті межа насичення та RPS можуть відрізнятися.
 
-**Що вимагається:** зафіксувати середовище, стабільний RPS, затримки, межу та вузьке місце.
+Модель k6 тут closed: VU чекає відповіді перед наступною дією. При уповільненні він надсилає менше запитів — це ризик coordinated omission. Warm-up прогріває кеш і з'єднання; вплив GC окремо не профілювався, JVM JIT у Python-сервісі немає.
 
-**Що зроблено:** [passport.json](../load-tests/results/lab5/passport.json).
-Це картка конкретного повного прогону, не гарантія production-продуктивності.
+Зупинка без видалення тому навчальної БД:
 
-```powershell
-$lab5Passport.system_performance_baseline | Select-Object environment, stable_throughput_rps, saturation_interval_vus, p95_ms, p99_ms, error_rate, critical_scenario, primary_bottleneck | Format-List
+```cmd
+%DC5% down
 ```
-
-У цьому паспорті: ≈81 RPS, p95 ≈248 ms, p99 ≈368 ms, 0% помилок.
-Прийнятними для лаби обрали p95 ≤500 ms, p99 ≤1000 ms, помилки <1%.
-Короткий демопрогін може не досягти насичення — не треба приписувати йому старий висновок.
-
-## 3. Матеріали в репозиторії
-
-Генератор — `load-tests/baseline.js`; керування режимами — `run_baseline.py`;
-таблиці/графіки — `load-tests/results/lab5`; картка системи — `passport.json`.
-Конфігурація ресурсів — `docker-compose.load.yml`; README посилається на цей звіт.
-
-## 4. Порядок захисту
-
-1. Підняти стенд і запустити живе нарощування VUs: підготовка та пункт 2.3.
-2. Відкрити повну таблицю/графіки й пояснити p95/p99 та насичення: 2.4–2.5.
-3. Показати контрольні режими й порівняння: 2.6. Короткий прогін не називати повним baseline.
-4. Відкрити картку системи: 2.7.
-
-### Що ще можуть запитати
-
-- Чому не Postman? Він не замінює автоматизований контрольований потік k6.
-- Чому більше користувачів ≠ більше RPS? Ресурс вичерпаний, нові запити стають у чергу.
-- Що таке coordinated omission? Наші VUs чекають відповіді перед наступною дією.
-  Коли сервер гальмує, вони самі надсилають менше запитів. Це не модель незалежного постійного потоку.
-- GC/JIT? GC і планування можуть давати окремі затримки. Тут Python, не JVM:
-  warmup насамперед прогріває кеш і з'єднання. Конкретну роль GC ми не профілювали.
-
-## Завершення
-
-```powershell
-docker compose @lab5Compose down
-```
-
-Без `-v`: навчальна БД залишається. Після цього можна запускати №8 без конкуренції за ресурси.
-Детальні методика, обмеження й артефакти: [технічний звіт №5](highload-lab5-technical.md).

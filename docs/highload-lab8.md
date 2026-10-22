@@ -1,242 +1,131 @@
-# Лабораторна №8. Захист кешу від сплесків навантаження
+# Лабораторна робота №8 — Інженерія стійкості кешу
 
-**Ідея:** №4 дала кеш, №5 виміряла швидкість, №8 перевіряє проблемні ситуації:
+На стенді License Service відтворено Cache Stampede, Cache Avalanche та Cache Penetration. Реалізовано Redis lock, TTL jitter і negative caching; ефект підтверджено вимірюваннями SQL, затримок і ресурсів БД.
 
-- Один ключ зник, його одночасно попросили 500 користувачів — **stampede**.
-- Одночасно закінчився кеш багатьох різних ключів — **avalanche**.
-- Постійно запитують ID, якого немає — **penetration**.
+## Запуск середовища
 
-Команди для **PowerShell**. Виконуй блоки зверху вниз в одному вікні.
-Потрібні Docker Desktop з Linux containers, Python 3.12+ та щонайменше 8 logical CPU у Docker.
-Venv необов'язковий. Інші навантажувальні стенди спочатку зупини командами `down` з їхніх звітів.
-Runner-и очищають **власну навчальну БД/Redis №8**. Production дані сюди не переносити.
+Команди для **Windows CMD**, послідовно в одному вікні. Потрібні Python 3.12+, Docker Desktop Linux containers, Compose 2.24.4+ та **8+ logical CPU у Docker**. Інші навантажувальні стенди та Minikube мають бути зупинені. Використовується окрема синтетична БД, не production.
 
-## Підготовка — один раз
-
-```powershell
-Set-Location C:\MTGMODS\labs-license-management-platform
-$labPython = if (Test-Path .\.venv\Scripts\python.exe) { (Resolve-Path .\.venv\Scripts\python.exe).Path } else { 'python' }
-& $labPython --version
-docker info --format 'OS={{.OSType}}; logical CPU={{.NCPU}}'
-$env:LAB8_PROTECTED = 'true'
-$env:LAB8_NEGATIVE_CACHE = 'true'
-$env:LAB4_CACHE_ENABLED = 'true'
-$env:LAB4_CACHE_TTL_SECONDS = '300'
-$lab8Compose = @('-p', 'mtgmods_cache_resilience_lab8', '-f', 'docker-compose.scaling.yml', '-f', 'docker-compose.cache.yml', '-f', 'docker-compose.load.yml', '-f', 'docker-compose.resilience.yml')
-docker compose @lab8Compose up --build -d
-docker compose @lab8Compose up -d --no-deps --force-recreate scaling-gateway
-docker compose @lab8Compose run --rm --no-deps cache-tools python /load-tests/reset_dataset.py
-docker compose @lab8Compose run --rm --no-deps cache-tools python /lab4/seed.py --rows 2000
-docker compose @lab8Compose ps
+```cmd
+cd /d C:\MTGMODS\labs-license-management-platform
+set "LABPY=python"
+if exist ".venv\Scripts\python.exe" set "LABPY=.venv\Scripts\python.exe"
+"%LABPY%" --version
+docker info --format "OS={{.OSType}}; logical CPU={{.NCPU}}"
+set "LAB4_CACHE_ENABLED=true"
+set "LAB4_CACHE_TTL_SECONDS=300"
+set "LAB8_PROTECTED=true"
+set "LAB8_NEGATIVE_CACHE=true"
+set "DC8=docker compose -p mtgmods_cache_resilience_lab8 -f docker-compose.scaling.yml -f docker-compose.cache.yml -f docker-compose.load.yml -f docker-compose.resilience.yml"
+%DC8% build license-db-init
+%DC8% up -d --wait --wait-timeout 180
+%DC8% up -d --no-deps --force-recreate scaling-gateway
+%DC8% run --rm -T --no-deps cache-tools python /load-tests/reset_dataset.py < NUL
+%DC8% run --rm -T --no-deps cache-tools python /lab4/seed.py --rows 2000 < NUL
+%DC8% ps
 ```
 
-Очікується `linux`, CPU ≥8, три healthy API, PostgreSQL і Redis. Адреса — `18108`.
-Авторизацію для навантажувальних сценаріїв runner готує сам; реальних оплат немає.
-Імена директорій нижче автоматично унікальні, вручну нічого підставляти не потрібно.
+Три API, Redis і PostgreSQL доступні через Nginx на `127.0.0.1:18108`. Runner-и скидають лише власні навчальні БД/Redis, самі готують авторизацію та повертають захист у ввімкнений стан через `finally`.
 
-## 2.1. Обрати дорогий популярний об'єкт
+## 2.1. Вибір ресурсоємного об'єкта
 
-**Що вимагається:** пояснити, який кешований результат небезпечно одночасно перераховувати.
+Публічна статистика продажів: `GET /api/v1/license/stats/public`. Один розрахунок виконує **11 бізнес-SELECT**; масове одночасне читання холодного ключа дублює цю роботу. Код агрегацій — [repository.py:154](../services/license/app/infrastructure/repository.py#L154).
 
-**Що зроблено:** та сама публічна статистика продажів License Service, що в №4.
-Один розрахунок виконує **11 бізнес-SELECT**, а не один SQL-запит.
-Щоб гарантовано встигло прийти багато одночасних MISS, у тесті перед реальним
-SQL додається **штучна затримка 2 s**. Вона однакова з/без захисту і не видається за production-поведінку.
+У [docker-compose.resilience.yml](../docker-compose.resilience.yml) задано однакову для обох режимів **штучну затримку 2 s** перед SQL, щоб відтворити конкурентний MISS. Це контрольоване підсилення експерименту, не production-затримка.
 
-```powershell
-$lab8Stats = Invoke-RestMethod http://127.0.0.1:18108/api/v1/license/stats/public
-$lab8Stats.subscriptions.overview | Format-List
+## 2.2. Відтворення Cache Stampede та Thundering Herd
+
+[run_stampede.py:28](../load-tests/run_stampede.py#L28) очищає кеш і запускає два однакові bursts по 500 VUs: без координації та з Redis lock. Усі запити очікують реальну статистику. `computations` рахує розрахунки; `stats_select_calls` — фактичні бізнес-SELECT у `pg_stat_statements`.
+
+```cmd
+set "BURST8=load-tests\results\lab8-burst-%RANDOM%-%RANDOM%"
+"%LABPY%" load-tests\run_stampede.py --vus 500 --output-dir "%BURST8%" < NUL
+"%LABPY%" load-tests\report_resilience.py "%BURST8%"
+start "" "%BURST8%\computations.svg"
 ```
 
-Конфігурація тестового режиму: [docker-compose.resilience.yml](../docker-compose.resilience.yml).
+Без захисту багато запитів паралельно рахують один ключ; ця хвиля звернень до БД є thundering herd. Із захистом очікуються **500 успішних відповідей, 1 розрахунок і 11 SELECT**. Порівняльні числа містяться у виводі, `stampede.json` і `comparison.csv`; незадовільний protected-результат завершує runner помилкою.
 
-## 2.2. Відтворити Cache Stampede та Thundering Herd
+## 2.3. Cache Avalanche та синхронне завершення TTL
 
-**Що вимагається:** прибрати ключ і одночасно подати 500+ запитів, показати сплеск SQL.
+Створено **24 різні агрегати продажів**, окремі ключі та 40 VUs на 12 s. Порівнюються одночасне завершення TTL через 6 s і розподілене через 3–9 s. Lock увімкнений в обох режимах: досліджується сплеск різних ключів, не stampede одного.
 
-**Що зроблено:** `run_stampede.py` сам очищає кеш і запускає два тести по 500 запитів:
-спочатку без координації, потім із захистом. В обох однакові дані та ресурси.
-Цей самий експеримент демонструє захист із пункту **2.4**, повторно його запускати не треба.
-
-```powershell
-$lab8Burst = 'load-tests/results/defense-burst-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff')
-& $labPython load-tests/run_stampede.py --vus 500 --output-dir $lab8Burst
-if ($LASTEXITCODE -ne 0) { throw 'Stampede-тест не пройшов: дивись помилку вище' }
-$lab8BurstRows = Get-Content (Join-Path $lab8Burst 'stampede.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-$lab8BurstRows | Select-Object protected, requests, computations, stats_select_calls, p95_ms, p99_ms, error_rate | Format-Table -AutoSize
+```cmd
+set "EXTRA8=load-tests\results\lab8-extra-%RANDOM%-%RANDOM%"
+"%LABPY%" load-tests\run_cache_resilience.py --only avalanche --output-dir "%EXTRA8%" < NUL
 ```
 
-**Що побачити:** `protected=false` — багато однакових обчислень;
-`protected=true` — 1 обчислення / 11 SELECT, усі 500 відповідей успішні.
-У збереженому повному прогоні було 500→1 обчислень, SQL 5500→11.
-`computations` — кількість розрахунків, `stats_select_calls` — SQL, `error_rate=0` — без помилок.
-Масова хвиля конкурентних звернень до БД тут і є **thundering herd**.
+Очікуються `synchronized` та `jitter`, по **24 SELECT**, без помилок. SQL, CPU та latency timelines зберігаються в `avalanche.json`; графіки будуються в п. 2.7. Jitter зменшує одночасний пік, а не кількість необхідних розрахунків.
 
-## 2.3. Відтворити Cache Avalanche — завершення групи ключів
+Код — [run_cache_resilience.py:113](../load-tests/run_cache_resilience.py#L113) і [lab8_routes.py](../services/license/app/api/lab8_routes.py). Навчальний SQL використовує однакове підсилення роботи ×4000 в обох режимах. Endpoint `/api/v1/lab8/aggregate/{bucket}` увімкнений лише для експериментів.
 
-**Що вимагається:** багато різних ключів одночасно втрачають кеш; виміряти наслідки.
+## 2.4. Координація регенерації кешу
 
-**Що зроблено:** 24 групи тестових продажів мають окремі агрегати та ключі.
-Спочатку TTL усіх закінчується через 6 s, потім порівнюється з TTL 3–9 s.
-40 VUs читають ці групи протягом 12 s. Lock увімкнений в обох режимах:
-ми перевіряємо одночасне завершення різних ключів, а не дублювання одного.
+У [cache_aside.py:115](../services/license/app/infrastructure/cache_aside.py#L115) перший запит отримує спільний Redis lock через `SET NX EX`; лише він рахує, інші читають готовий результат після очікування. Lease — 120 s, граничний час запиту — 90 s. Перед публікацією перевіряються token і revision; зняття lock видаляє лише блокування його власника.
 
-```powershell
-$lab8Extra = 'load-tests/results/defense-extra-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff')
-& $labPython load-tests/run_cache_resilience.py --only avalanche --output-dir $lab8Extra
-if ($LASTEXITCODE -ne 0) { throw 'Avalanche-тест не пройшов' }
-$lab8Avalanche = Get-Content (Join-Path $lab8Extra 'avalanche.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-$lab8Avalanche | ForEach-Object {
-    [pscustomobject]@{ Mode = $_.label; Keys = $_.keys; SQL = $_.database.calls; p99ms = $_.summary.p99_ms; Errors = $_.summary.error_rate }
-} | Format-Table -AutoSize
+Перевірка — protected-частина **вже виконаного п. 2.2**, повторний тест не потрібний. Це координація між усіма трьома API, не локальний mutex. Один розрахунок статистики = 11 SQL, тому результат «1» стосується саме розрахунку.
+
+## 2.5. TTL Jittering
+
+[cache_aside.py:91](../services/license/app/infrastructure/cache_aside.py#L91), `expiration_seconds`, задає `TTL = 300 ± 30 s`. Випадкові значення розносять завершення ключів у часі.
+
+```cmd
+%DC8% run --rm -T --no-deps cache-tools python /load-tests/ttl_demo.py < NUL
 ```
 
-**Очікується:** `synchronized` та `jitter`, в обох 24 SQL і 0 помилок.
-Змінюється не кількість потрібних розрахунків, а їх розподіл у часі.
-Графіки будуються в пункті 2.7 після другого експерименту.
+`observed_ttls_seconds` містить реально прочитані TTL 20 демонстраційних ключів, приблизно 270–330 s. Jitter не усуває stampede одного ключа — для нього використовується lock.
 
-Endpoint `/api/v1/lab8/aggregate/{bucket}` існує лише в навчальному режимі.
-У SQL є **штучне посилення роботи ×4000**, однакове в обох режимах; це не реальний
-production-запит. Воно дозволяє на 2000 записах побачити сплеск ресурсів БД.
+## 2.6. Negative Caching проти Cache Penetration
 
-## 2.4. Захист: лише один сервіс рахує холодний ключ
+[negative_cache.py:30](../services/license/app/infrastructure/negative_cache.py#L30) зберігає лише факт відсутності ліцензії за ID на **15 s**. Маршрут [admin_routes.py:41](../services/license/app/api/admin_routes.py#L41) перевіряє права до кешу. Приватні дані наявних ліцензій не кешуються. API-створення інвалідує попередню відсутність.
 
-**Що вимагається:** не дати всім запитам паралельно рахувати однаковий результат.
-
-**Що зроблено:** перший сервіс бере спільний Redis lock (`SET NX EX`).
-Він рахує статистику, інші чекають і читають готове. Lock автоматично закінчується
-через 120 s, запит чекає не більше 90 s. Власник перевіряється перед зняттям lock.
-
-**Показати доказ із уже виконаного пункту 2.2:**
-
-```powershell
-$lab8BurstRows | Where-Object protected -eq $true | Select-Object requests, computations, stats_select_calls, error_rate | Format-List
+```cmd
+"%LABPY%" load-tests\run_cache_resilience.py --only negative --output-dir "%EXTRA8%" < NUL
+"%LABPY%" -c "import json,sys; r=json.load(open(sys.argv[1])); print(json.dumps(r[1]['verified'],indent=2))" "%EXTRA8%\negative.json"
 ```
 
-Очікується 500 запитів, 1 розрахунок, 11 SELECT, 0 помилок.
-Це спільний Redis lock між трьома сервісами, не локальна Python-змінна.
-Код: [cache_aside.py](../services/license/app/infrastructure/cache_aside.py).
-Якщо Redis недоступний, координація втрачається — це не захист від падіння самого Redis.
+Тест повторює запити до п'яти відсутніх ID. Без захисту кожен звертається до БД; із захистом після **5 початкових SQL** у вимірюваному вікні має бути **0 SQL**. HTTP `404` — правильний бізнес-результат, не помилка тесту. У `verified` мають бути три `true`: створення після 404, завершення TTL та fallback при відмові Redis.
 
-## 2.5. TTL jitter — різний час завершення кешу
+## 2.7. Порівняльні метрики та Resilience Profile
 
-**Що вимагається:** не дати всім ключам завершитися в одну мить.
+Звіти з результатів поточного запуску:
 
-**Що зроблено:** TTL = базовий час ± випадкова поправка.
-Для звичайної статистики №8 це 300±30 s; у прискореному avalanche-тесті — перше TTL 6±3 s.
-
-```powershell
-docker compose @lab8Compose run --rm --no-deps cache-tools python /load-tests/ttl_demo.py
+```cmd
+"%LABPY%" load-tests\report_cache_resilience.py "%EXTRA8%"
+type "%BURST8%\comparison.csv"
+type "%EXTRA8%\comparison.csv"
+start "" "%BURST8%\p99_ms.svg"
+start "" "%EXTRA8%\avalanche-cpu-timeline.svg"
+start "" "%EXTRA8%\avalanche-latency-timeline.svg"
+start "" "%EXTRA8%\negative-sql-timeline.svg"
 ```
 
-**Очікується:** `observed_ttls_seconds` — різні значення приблизно 270–330.
-Це фактичні TTL двадцяти демонстраційних ключів Redis. Точні числа щоразу різні.
-Сам jitter не рятує один популярний ключ від stampede — для цього потрібен lock.
+Початкові повні вимірювання на ПК: [stampede CSV](../load-tests/results/lab8/comparison.csv), [avalanche / negative CSV](../load-tests/results/lab8-verified/comparison.csv). RPS — завершені HTTP-запити за секунду, p95/p99 — затримки у ms:
 
-## 2.6. Negative Caching — запам'ятати, що ID не існує
-
-**Що вимагається:** повторні запити відсутнього об'єкта не мають щоразу йти в БД.
-
-**Що зроблено:** для ADMIN GET ліцензії за ID кешуємо лише факт відсутності на 15 s.
-Права перевіряються до кешу. Знайдені ліцензії та приватні дані не кешуються.
-Створення ліцензії через API робить старий маркер відсутності недійсним.
-
-**Продовження в ту саму директорію, яку створив пункт 2.3:**
-
-```powershell
-& $labPython load-tests/run_cache_resilience.py --only negative --output-dir $lab8Extra
-if ($LASTEXITCODE -ne 0) { throw 'Negative-cache тест не пройшов' }
-$lab8Negative = Get-Content (Join-Path $lab8Extra 'negative.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-$lab8Negative | ForEach-Object {
-    [pscustomobject]@{ Mode = $_.label; Requests = $_.summary.requests; SQL = $_.database.calls; WarmupSQL = $_.warmup_sql_calls; Errors = $_.summary.error_rate }
-} | Format-Table -AutoSize
-$lab8Negative[1].verified | Format-List
+```text
+Режим                  SELECT   RPS      p95       p99       Помилки
+Stampede без lock      5500     17.81    22546.26  22879.35  0%
+Stampede з lock        11       37.22    8041.09   8237.14   0%
+Avalanche синхронний   24       907.32   88.54     165.70    0%
+Avalanche jitter      24       855.81   96.31     143.91    0%
+Negative без кешу     8177     676.51   146.08    489.85    0%
+Negative з кешем      0        1271.97  60.18     125.61    0%
 ```
 
-**Очікується:** без захисту SQL приблизно стільки ж, скільки запитів; із захистом — 0
-у вимірюваному вікні. Перед ним є **5 початкових SQL**, щоб створити маркери для 5 відсутніх ID.
-404 тут правильна відповідь, не збій сервера. `verified` має три `true`:
-створення після 404, завершення TTL та робота через БД при вимкненому Redis.
-Runner реально перевіряє ці умови, а не просто друкує наперед задані результати.
+Burst RPS включає очікування стартового бар'єра; його не слід порівнювати з тривалим steady-state RPS. У avalanche sampled peak CPU PostgreSQL знизився **156.61% → 104.92%**, максимальний секундний p99 — **678.91 → 201.81 ms**. CPU вимірювався приблизно кожні 100 ms; одне ядро = 100%. Нові цифри залежать від ПК, ці експерименти не є production SLA.
 
-**Показати MISS → HIT вручну:**
+**Resilience Profile:**
 
-```powershell
-$lab8Token = docker compose @lab8Compose exec -T license-service-1 python -c "import jwt; from datetime import datetime,timedelta,timezone; from app.shared.config import settings; print(jwt.encode({'sub':'1','role':'ADMIN','type':'access','exp':datetime.now(timezone.utc)+timedelta(minutes=15)},settings.JWT_SECRET,algorithm='HS256'))"
-docker compose @lab8Compose exec -T redis redis-cli DEL mtgmods:license:absent:v1:9999989
-curl.exe -sS -D - -o NUL -H "Authorization: Bearer $($lab8Token.Trim())" http://127.0.0.1:18108/api/v1/license/9999989
-curl.exe -sS -D - -o NUL -H "Authorization: Bearer $($lab8Token.Trim())" http://127.0.0.1:18108/api/v1/license/9999989
+- Lock має TTL після загибелі власника; перевірка token захищає блокування нового власника. При відмові Redis читання йде до БД, але координація втрачається.
+- Jitter допускає вік статистики до 330 s без мутацій; SWR у цьому режимі не використовується.
+- Negative markers витрачають пам'ять: TTL обмежує час, не кількість. Різні випадкові ID все одно потребують SQL; прямий SQL може залишити хибний `404` до 15 s.
+- Аварія writer може залишити `BYPASS`; marker не можна прибирати до завершення його транзакції.
+- Один Redis та одна БД залишаються точками відмови; реплікація/шардинг №6–7 не заявляються.
+
+**Альтернативи.** Поточний `SET NX` — не Redlock: Redlock координує більшість незалежних Redis-вузлів і має часові/мережеві припущення. Bloom Filter відповідає «точно немає / можливо є» та допускає false positives. XFetch ймовірнісно починає оновлення до expiration. Ці альтернативи не реалізовані; обрано спільний lock, jitter та короткі negative markers.
+
+Зупинка без видалення тому навчальної БД:
+
+```cmd
+%DC8% down
 ```
-
-Двічі HTTP 404; спочатку `X-Negative-Cache: MISS`, потім `HIT`.
-Захист допомагає при **повторенні тих самих ID**. Нові випадкові ID все одно доходять до БД.
-Код: [negative_cache.py](../services/license/app/infrastructure/negative_cache.py).
-
-## 2.7. Порівняльні результати та ризики захисту
-
-**Що вимагається:** порівняти SQL/RPS/p95/p99/помилки та пояснити обмеження.
-
-**Побудувати звіти з нових результатів і відкрити графіки:**
-
-```powershell
-& $labPython load-tests/report_resilience.py $lab8Burst
-if ($LASTEXITCODE -ne 0) { throw 'Не вдалося побудувати stampede-звіт' }
-& $labPython load-tests/report_cache_resilience.py $lab8Extra
-if ($LASTEXITCODE -ne 0) { throw 'Не вдалося побудувати avalanche/negative-звіт' }
-Import-Csv (Join-Path $lab8Extra 'comparison.csv') | Select-Object mode, label, sql_calls, rps, p95_ms, p99_ms, error_rate | Format-Table -AutoSize
-Invoke-Item (Join-Path $lab8Burst 'computations.svg')
-Invoke-Item (Join-Path $lab8Extra 'avalanche-sql-timeline.svg')
-Invoke-Item (Join-Path $lab8Extra 'avalanche-cpu-timeline.svg')
-Invoke-Item (Join-Path $lab8Extra 'negative-latency-timeline.svg')
-```
-
-Читати графіки так: червоне — без захисту/синхронний TTL; зелене — захист/jitter.
-У avalanche має стати меншим одночасний пік, **не обов'язково кращий середній RPS**.
-CPU вимірюється приблизно кожні 100 ms, одне ядро = 100%; це sampled peak із похибкою.
-Нові цифри можуть відрізнятись від початкових: це тести конкретного ПК, не production SLA.
-
-**Resilience Profile простими словами:**
-
-- Сервіс помер із lock — lock закінчиться за TTL; інші не чекають вічно.
-- Старий власник не може видалити lock нового власника: перевіряється його token.
-- Redis упав — читання йде до БД, але захист від stampede при цьому не працює.
-- Ключі живуть довше через jitter — дані можуть бути старішими, до 330 s без записів.
-- Багато різних відсутніх ID — negative markers займають пам'ять; TTL обмежує час, не кількість.
-- Прямий SQL поза API не інвалідує negative marker: хибний 404 можливий до 15 s.
-- Аварія посеред запису може залишити службовий маркер і `BYPASS`; ручне відновлення
-  описане у [технічному звіті №4](highload-lab4-technical.md#відновлення-після-аварійно-залишеного-writer).
-
-Початкові перевірені вимірювання: [stampede](../load-tests/results/lab8/comparison.csv)
-та [avalanche/negative](../load-tests/results/lab8-verified/metrics.md).
-
-## 3. Матеріали в репозиторії
-
-Lock/jitter — `cache_aside.py`; negative cache — `negative_cache.py`;
-генератори й runner-и — `load-tests`; ризики механізмів — Resilience Profile у пункті 2.7.
-README посилається на цей звіт, схему наведено в [технічних подробицях](highload-lab8-technical.md#архітектура-та-межі-роботи).
-
-## 4. Порядок захисту
-
-1. Підняти стенд, показати 500 запитів без/із захистом: 2.2. Це одразу перевіряє 2.4.
-2. Показати avalanche-тест і різні TTL: 2.3 та 2.5.
-3. Показати negative-cache тест і ручні 404 MISS → HIT: 2.6.
-4. Побудувати графіки, порівняти SQL та затримки, пояснити ризики: 2.7.
-
-### Якщо запитають альтернативні алгоритми
-
-- Наш lock — один Redis, **не Redlock**. Redlock намагається отримати блокування
-  на більшості незалежних Redis-вузлів за обмежений час; має мережеві та часові припущення.
-- Bloom Filter компактно перевіряє «точно немає / можливо є»; можливі false positives.
-  Треба додавати нові ID до filter. Ми обрали простіші 15-секундні negative markers.
-- XFetch / probabilistic early expiration — ймовірнісно почати оновлення ще до завершення TTL,
-  щоб усі не почали одночасно. У нас цей алгоритм не реалізований.
-- Реплікація й шардинг №6–7 у цій роботі не заявляються: один Redis та одна БД залишаються точками відмови.
-
-## Завершення
-
-```powershell
-docker compose @lab8Compose down
-```
-
-Без `-v`: БД зберігається. Для повторної демки проходь блоки знову — каталоги отримають нові імена.
-Повний алгоритм, схема й методика: [технічний звіт №8](highload-lab8-technical.md).

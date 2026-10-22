@@ -184,22 +184,15 @@ docker compose -f docker-compose.scaling.yml up --build -d
 ## Розподілене кешування ІВСАВПЗ №4
 
 Звіти [№4](docs/highload-lab4.md), [№5](docs/highload-lab5.md) та
-[№8](docs/highload-lab8.md) оформлені за пунктами завдань: просте пояснення,
-готові PowerShell-команди й очікуваний результат. Детальні алгоритми та
-початкові вимірювання винесено в окремі `highload-lab*-technical.md`.
+[№8](docs/highload-lab8.md) містять по одному завершеному документу на роботу:
+пункти завдання, реалізація з посиланнями на код, команди Windows CMD,
+виміряні результати та обмеження. CSV/JSON/SVG збережено як артефакти експериментів.
 
 На основі горизонтального масштабування реалізовано окремий строгий Cache-Aside
 режим License Service: спільний Redis, TTL, заголовки HIT/MISS/BYPASS,
 revision-fenced інвалідація після HTTP-мутацій і fallback читання до PostgreSQL.
 Звіт за пунктами, C4-схема, політика ключів, вимірювання cold/hot, компроміси
 консистентності та сценарії відновлення: [docs/highload-lab4.md](docs/highload-lab4.md).
-
-```powershell
-$dc = @('-f', 'docker-compose.scaling.yml', '-f', 'docker-compose.cache.yml')
-docker compose @dc up --build -d
-docker compose @dc run --rm --no-deps cache-tools
-python scripts/highload-lab4/verify.py --samples 10
-```
 
 Gateway цього ізольованого стенда — `http://127.0.0.1:18104`.
 Недоступний Redis не блокує статистику; строгі записи до його відновлення
@@ -212,13 +205,6 @@ Gateway цього ізольованого стенда — `http://127.0.0.1:1
 SQL/resource метрики, таблиці, графіки та System Performance Baseline.
 Звіт і команди: [docs/highload-lab5.md](docs/highload-lab5.md).
 Вимірювання: [load-tests/results/lab5/metrics.md](load-tests/results/lab5/metrics.md).
-
-```powershell
-$dc = @('-f', 'docker-compose.scaling.yml', '-f', 'docker-compose.cache.yml', '-f', 'docker-compose.load.yml')
-docker compose @dc up --build -d
-python load-tests/run_baseline.py --output-dir load-tests/results/my-run
-python load-tests/report.py load-tests/results/my-run
-```
 
 Порт стенда — 18105. Потрібно 8+ logical CPU у Docker. Runner працює лише
 з окремою synthetic DB і не приймає production URL; повторні прогони
@@ -265,12 +251,8 @@ helm upgrade --install lab-license helm/mtgmods-license -n mtgmods-helm -f helm/
 Кореневий Application читає `argocd-apps/` і розгортає наявний Helm-чарт у
 виділеному Minikube-профілі. Зовнішній Secret не зберігається у Git; оновлення,
 self-healing і відкат виконуються через Git без ручного `helm upgrade`.
-Пункти роботи, запуск, команди демонстрації та результати:
+Єдиний звіт за пунктами роботи, посилання на код, команди CMD та результати:
 [docs/devops-lab5.md](docs/devops-lab5.md).
-
-```powershell
-.\scripts\devops-lab5\bootstrap.ps1
-```
 
 ## License
 
