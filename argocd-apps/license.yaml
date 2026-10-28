@@ -7,11 +7,12 @@ spec:
   project: default
   source:
     repoURL: https://github.com/MTGMODS/labs-license-management-platform.git
-    targetRevision: main
+    targetRevision: codex/devops-lab6-progressive-delivery
     path: helm/mtgmods-license
     helm:
       valueFiles:
         - values-minikube.yaml
+        - values-rollouts.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: mtgmods-gitops
@@ -19,5 +20,11 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
     syncOptions:
       - CreateNamespace=true

@@ -1,0 +1,27 @@
+# Lab 6 adds progressive delivery to the GitOps configuration from lab 5.
+replicaCount: 5
+
+image:
+  tag: sha-805ca0af230d9ece135982527f3c69ba6ca231b0
+
+config:
+  appVersion: devops-lab6-v1
+
+rollout:
+  enabled: true
+  strategy:
+    canary:
+      maxSurge: 1
+      maxUnavailable: 0
+      steps:
+        - setWeight: 20
+        - pause: {}
+        - setWeight: 60
+        - pause:
+            duration: 30s
+        - setWeight: 80
+        - pause:
+            duration: 30s
+
+gitops:
+  progressDeadlineSeconds: 180

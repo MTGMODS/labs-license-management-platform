@@ -1,0 +1,26 @@
+{{- if .Values.rollout.enabled }}
+{{- if lt (int .Values.replicaCount) 4 }}
+{{- fail "rollout.enabled requires replicaCount >= 4 for the progressive-delivery lab" }}
+{{- end }}
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: {{ include "mtgmods-license.fullname" . }}
+  labels:
+    {{- include "mtgmods-license.labels" . | nindent 4 }}
+  {{- if .Values.gitops.enabled }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  {{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: 5
+  progressDeadlineSeconds: {{ .Values.gitops.progressDeadlineSeconds }}
+  selector:
+    matchLabels:
+      {{- include "mtgmods-license.componentLabels" (dict "Release" .Release "Chart" .Chart "Values" .Values "component" "api") | nindent 6 }}
+  template:
+    {{- include "mtgmods-license.podTemplate" . | nindent 4 }}
+  strategy:
+    {{- toYaml (required "rollout.strategy must be configured" .Values.rollout.strategy) | nindent 4 }}
+{{- end }}

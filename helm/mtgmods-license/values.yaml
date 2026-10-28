@@ -1,5 +1,9 @@
 replicaCount: 2
 
+rollout:
+  enabled: false
+  strategy: {}
+
 image:
   repository: ghcr.io/mtgmods/labs-license-management-platform-license
   tag: sha-805ca0af230d9ece135982527f3c69ba6ca231b0

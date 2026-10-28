@@ -1,12 +1,13 @@
 param(
     [string]$Profile = 'mtgmods-devops5',
+    [string]$StateDirectory = '',
     [switch]$SkipRoot
 )
 
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
-$localDir = Join-Path $repoRoot '.local/devops5'
+$localDir = if ($StateDirectory) { $StateDirectory } else { Join-Path $repoRoot '.local/devops5' }
 $cliDir = Join-Path $env:LOCALAPPDATA 'Programs/ArgoCD'
 $argoVersion = 'v3.5.6'
 New-Item -ItemType Directory -Force -Path $localDir, $cliDir | Out-Null

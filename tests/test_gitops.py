@@ -26,7 +26,7 @@ def test_gitops_bootstraps_the_existing_chart_from_git():
     assert root['spec']['source']['path'] == 'argocd-apps'
     assert root['spec']['syncPolicy']['automated'] == {'prune': True, 'selfHeal': True}
     assert app['spec']['source']['path'] == 'helm/mtgmods-license'
-    assert app['spec']['source']['helm']['valueFiles'] == ['values-minikube.yaml']
+    assert app['spec']['source']['helm']['valueFiles'] == ['values-minikube.yaml', 'values-rollouts.yaml']
     assert app['spec']['destination']['namespace'] == 'mtgmods-gitops'
     assert root['spec']['source']['targetRevision'] == app['spec']['source']['targetRevision']
     for manifest in (root, app):
