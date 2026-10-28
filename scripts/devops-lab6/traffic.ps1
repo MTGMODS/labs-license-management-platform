@@ -42,6 +42,13 @@ $pod = @{
 }
 try {
     $pod | ConvertTo-Json -Depth 12 | kubectl --context $Profile apply -f - | Out-Host
+    $deadline = [DateTime]::UtcNow.AddSeconds(120)
+    do {
+        $status = kubectl --context $Profile -n mtgmods-gitops get pod $podName -o json | ConvertFrom-Json
+        if ($status.status.phase -in @('Running', 'Succeeded', 'Failed')) { break }
+        if ([DateTime]::UtcNow -ge $deadline) { throw 'Traffic pod did not start within 120 seconds.' }
+        Start-Sleep -Milliseconds 500
+    } while ($true)
     kubectl --context $Profile -n mtgmods-gitops logs -f $podName --pod-running-timeout=120s
     $status = kubectl --context $Profile -n mtgmods-gitops get pod $podName -o json | ConvertFrom-Json
     for ($attempt = 0; $status.status.phase -notin @('Succeeded', 'Failed') -and $attempt -lt 10; $attempt++) {
