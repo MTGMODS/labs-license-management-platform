@@ -1,0 +1,314 @@
+{
+  "date": "2026-10-28",
+  "profile": "mtgmods-devops6",
+  "validation_ref": "codex/devops-lab6-progressive-delivery",
+  "controller_chart": "2.43.8",
+  "controller_version": "v1.10.1",
+  "note": "Live GitOps experiment on the feature branch before the PR merge. Final manifests track main. The v3 abort was repeated to verify the stable-recovery wait.",
+  "stages": [
+    {
+      "stage": "01-initial-v1",
+      "captured_at": "2026-10-28T16:03:19.9683134Z",
+      "git_revision": "b95abd3916fe05330103a2e3520681a307d7734d",
+      "sync": "Synced",
+      "health": "Healthy",
+      "desired_image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-805ca0af230d9ece135982527f3c69ba6ca231b0",
+      "rollout_phase": "Healthy",
+      "stable_hash": "5d9767ddb",
+      "current_hash": "5d9767ddb",
+      "step": 6,
+      "aborted": null,
+      "replica_sets": [
+        {
+          "name": "mtgmods-license-5d9767ddb",
+          "image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-805ca0af230d9ece135982527f3c69ba6ca231b0",
+          "version": "devops-lab6-v1",
+          "replicas": 5,
+          "ready": 5
+        }
+      ]
+    },
+    {
+      "stage": "02-v2-paused",
+      "captured_at": "2026-10-28T16:05:40.9561926Z",
+      "git_revision": "a7164154d7ece428f4cc8d7182b03b4299ff97d6",
+      "sync": "Synced",
+      "health": "Suspended",
+      "desired_image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-07f44c2e07c73ad805d978dedb06ca231f3f8850",
+      "rollout_phase": "Paused",
+      "stable_hash": "5d9767ddb",
+      "current_hash": "54d59464c9",
+      "step": 1,
+      "aborted": null,
+      "replica_sets": [
+        {
+          "name": "mtgmods-license-54d59464c9",
+          "image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-07f44c2e07c73ad805d978dedb06ca231f3f8850",
+          "version": "devops-lab6-v2",
+          "replicas": 1,
+          "ready": 1
+        },
+        {
+          "name": "mtgmods-license-5d9767ddb",
+          "image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-805ca0af230d9ece135982527f3c69ba6ca231b0",
+          "version": "devops-lab6-v1",
+          "replicas": 4,
+          "ready": 4
+        }
+      ]
+    },
+    {
+      "stage": "03-v2-weight60",
+      "captured_at": "2026-10-28T16:06:43.3350715Z",
+      "git_revision": "a7164154d7ece428f4cc8d7182b03b4299ff97d6",
+      "sync": "Synced",
+      "health": "Suspended",
+      "desired_image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-07f44c2e07c73ad805d978dedb06ca231f3f8850",
+      "rollout_phase": "Paused",
+      "stable_hash": "5d9767ddb",
+      "current_hash": "54d59464c9",
+      "step": 3,
+      "aborted": null,
+      "replica_sets": [
+        {
+          "name": "mtgmods-license-54d59464c9",
+          "image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-07f44c2e07c73ad805d978dedb06ca231f3f8850",
+          "version": "devops-lab6-v2",
+          "replicas": 3,
+          "ready": 3
+        },
+        {
+          "name": "mtgmods-license-5d9767ddb",
+          "image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-805ca0af230d9ece135982527f3c69ba6ca231b0",
+          "version": "devops-lab6-v1",
+          "replicas": 2,
+          "ready": 2
+        }
+      ]
+    },
+    {
+      "stage": "04-v2-weight80",
+      "captured_at": "2026-10-28T16:07:21.4783061Z",
+      "git_revision": "a7164154d7ece428f4cc8d7182b03b4299ff97d6",
+      "sync": "Synced",
+      "health": "Suspended",
+      "desired_image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-07f44c2e07c73ad805d978dedb06ca231f3f8850",
+      "rollout_phase": "Paused",
+      "stable_hash": "5d9767ddb",
+      "current_hash": "54d59464c9",
+      "step": 5,
+      "aborted": null,
+      "replica_sets": [
+        {
+          "name": "mtgmods-license-54d59464c9",
+          "image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-07f44c2e07c73ad805d978dedb06ca231f3f8850",
+          "version": "devops-lab6-v2",
+          "replicas": 4,
+          "ready": 4
+        },
+        {
+          "name": "mtgmods-license-5d9767ddb",
+          "image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-805ca0af230d9ece135982527f3c69ba6ca231b0",
+          "version": "devops-lab6-v1",
+          "replicas": 1,
+          "ready": 1
+        }
+      ]
+    },
+    {
+      "stage": "05-v2-healthy",
+      "captured_at": "2026-10-28T16:08:00.4032819Z",
+      "git_revision": "a7164154d7ece428f4cc8d7182b03b4299ff97d6",
+      "sync": "Synced",
+      "health": "Healthy",
+      "desired_image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-07f44c2e07c73ad805d978dedb06ca231f3f8850",
+      "rollout_phase": "Healthy",
+      "stable_hash": "54d59464c9",
+      "current_hash": "54d59464c9",
+      "step": 6,
+      "aborted": null,
+      "replica_sets": [
+        {
+          "name": "mtgmods-license-54d59464c9",
+          "image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-07f44c2e07c73ad805d978dedb06ca231f3f8850",
+          "version": "devops-lab6-v2",
+          "replicas": 5,
+          "ready": 5
+        },
+        {
+          "name": "mtgmods-license-5d9767ddb",
+          "image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-805ca0af230d9ece135982527f3c69ba6ca231b0",
+          "version": "devops-lab6-v1",
+          "replicas": 0,
+          "ready": null
+        }
+      ]
+    },
+    {
+      "stage": "06-v3-paused",
+      "captured_at": "2026-10-28T16:09:18.2236959Z",
+      "git_revision": "75b78e53f1e04c9c0d74456854eb646c72fd5527",
+      "sync": "Synced",
+      "health": "Suspended",
+      "desired_image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-b200fa774adfe73da92ea630f25b6e399c3beb43",
+      "rollout_phase": "Paused",
+      "stable_hash": "54d59464c9",
+      "current_hash": "698d784d55",
+      "step": 1,
+      "aborted": null,
+      "replica_sets": [
+        {
+          "name": "mtgmods-license-54d59464c9",
+          "image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-07f44c2e07c73ad805d978dedb06ca231f3f8850",
+          "version": "devops-lab6-v2",
+          "replicas": 4,
+          "ready": 4
+        },
+        {
+          "name": "mtgmods-license-5d9767ddb",
+          "image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-805ca0af230d9ece135982527f3c69ba6ca231b0",
+          "version": "devops-lab6-v1",
+          "replicas": 0,
+          "ready": null
+        },
+        {
+          "name": "mtgmods-license-698d784d55",
+          "image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-b200fa774adfe73da92ea630f25b6e399c3beb43",
+          "version": "devops-lab6-v3",
+          "replicas": 1,
+          "ready": 1
+        }
+      ]
+    },
+    {
+      "stage": "06b-v3-paused",
+      "captured_at": "2026-10-28T16:12:46.2968718Z",
+      "git_revision": "e19b1ed7aec8851e9f0a7f091ccac4ad87ff930d",
+      "sync": "Synced",
+      "health": "Suspended",
+      "desired_image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-b200fa774adfe73da92ea630f25b6e399c3beb43",
+      "rollout_phase": "Paused",
+      "stable_hash": "54d59464c9",
+      "current_hash": "698d784d55",
+      "step": 1,
+      "aborted": null,
+      "replica_sets": [
+        {
+          "name": "mtgmods-license-54d59464c9",
+          "image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-07f44c2e07c73ad805d978dedb06ca231f3f8850",
+          "version": "devops-lab6-v2",
+          "replicas": 4,
+          "ready": 4
+        },
+        {
+          "name": "mtgmods-license-5d9767ddb",
+          "image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-805ca0af230d9ece135982527f3c69ba6ca231b0",
+          "version": "devops-lab6-v1",
+          "replicas": 0,
+          "ready": null
+        },
+        {
+          "name": "mtgmods-license-698d784d55",
+          "image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-b200fa774adfe73da92ea630f25b6e399c3beb43",
+          "version": "devops-lab6-v3",
+          "replicas": 1,
+          "ready": 1
+        }
+      ]
+    },
+    {
+      "stage": "07b-v3-aborted",
+      "captured_at": "2026-10-28T16:13:41.2008328Z",
+      "git_revision": "e19b1ed7aec8851e9f0a7f091ccac4ad87ff930d",
+      "sync": "Synced",
+      "health": "Degraded",
+      "desired_image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-b200fa774adfe73da92ea630f25b6e399c3beb43",
+      "rollout_phase": "Degraded",
+      "stable_hash": "54d59464c9",
+      "current_hash": "698d784d55",
+      "step": 0,
+      "aborted": true,
+      "replica_sets": [
+        {
+          "name": "mtgmods-license-54d59464c9",
+          "image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-07f44c2e07c73ad805d978dedb06ca231f3f8850",
+          "version": "devops-lab6-v2",
+          "replicas": 5,
+          "ready": 5
+        },
+        {
+          "name": "mtgmods-license-5d9767ddb",
+          "image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-805ca0af230d9ece135982527f3c69ba6ca231b0",
+          "version": "devops-lab6-v1",
+          "replicas": 0,
+          "ready": null
+        },
+        {
+          "name": "mtgmods-license-698d784d55",
+          "image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-b200fa774adfe73da92ea630f25b6e399c3beb43",
+          "version": "devops-lab6-v3",
+          "replicas": 0,
+          "ready": null
+        }
+      ]
+    },
+    {
+      "stage": "08b-git-revert-v2",
+      "captured_at": "2026-10-28T16:15:17.0579550Z",
+      "git_revision": "af29ded663f1576b84c7748a78b70d61d543d03a",
+      "sync": "Synced",
+      "health": "Healthy",
+      "desired_image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-07f44c2e07c73ad805d978dedb06ca231f3f8850",
+      "rollout_phase": "Healthy",
+      "stable_hash": "54d59464c9",
+      "current_hash": "54d59464c9",
+      "step": 6,
+      "aborted": null,
+      "replica_sets": [
+        {
+          "name": "mtgmods-license-54d59464c9",
+          "image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-07f44c2e07c73ad805d978dedb06ca231f3f8850",
+          "version": "devops-lab6-v2",
+          "replicas": 5,
+          "ready": 5
+        },
+        {
+          "name": "mtgmods-license-5d9767ddb",
+          "image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-805ca0af230d9ece135982527f3c69ba6ca231b0",
+          "version": "devops-lab6-v1",
+          "replicas": 0,
+          "ready": null
+        },
+        {
+          "name": "mtgmods-license-698d784d55",
+          "image": "ghcr.io/mtgmods/labs-license-management-platform-license:sha-b200fa774adfe73da92ea630f25b6e399c3beb43",
+          "version": "devops-lab6-v3",
+          "replicas": 0,
+          "ready": null
+        }
+      ]
+    }
+  ],
+  "traffic_summary": {
+    "01": {
+      "devops-lab6-v1": 30
+    },
+    "02": {
+      "devops-lab6-v1": 80,
+      "devops-lab6-v2": 20
+    },
+    "05": {
+      "devops-lab6-v2": 50
+    },
+    "06": {
+      "devops-lab6-v2": 81,
+      "devops-lab6-v3": 19
+    },
+    "07b": {
+      "devops-lab6-v2": 50
+    },
+    "08b": {
+      "devops-lab6-v2": 50
+    }
+  }
+}

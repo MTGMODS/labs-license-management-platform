@@ -12,6 +12,7 @@ spec:
     helm:
       valueFiles:
         - values-minikube.yaml
+        - values-rollouts.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: mtgmods-gitops
@@ -19,5 +20,11 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
     syncOptions:
       - CreateNamespace=true

@@ -52,7 +52,7 @@ jobs:
         with:
           version: v3.20.0
       - run: python -m pip install pytest==9.0.1 PyYAML==6.0.3
-      - run: python -m pytest tests/test_gitops.py -q
+      - run: python -m pytest tests/test_gitops.py tests/test_rollouts.py -q
 
   python:
     name: Python / ${{ matrix.component }}

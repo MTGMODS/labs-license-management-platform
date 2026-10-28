@@ -161,3 +161,15 @@ kubectl get all,pvc,ingress -n mtgmods-helm
 
 Повний опис реалізації та зафіксованих результатів міститься у
 [`docs/devops-lab4.md`](../../docs/devops-lab4.md).
+
+## Progressive delivery (ЛР-6)
+
+За замовчуванням `rollout.enabled=false`: Helm-релізи ЛР-4 залишаються Deployment.
+Argo CD додатково накладає `values-rollouts.yaml` на `values-minikube.yaml`:
+створюється Rollout із 5 репліками, кроками 20/60/80%, ручною та часовими паузами.
+Обидва контролери використовують один Pod template. `APP_VERSION` записаний
+безпосередньо в ньому, щоб stable ReplicaSet не змінив видиму версію після abort.
+
+Контролер Argo Rollouts встановлюється окремим Application через App of Apps.
+Для цього режиму застосовуються GitOps-релізи, а не `helm upgrade/rollback`.
+Команди та експеримент: [devops-lab6.md](../../docs/devops-lab6.md).

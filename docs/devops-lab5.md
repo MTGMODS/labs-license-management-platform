@@ -1,5 +1,10 @@
 # Лабораторна робота №5 — GitOps через Argo CD
 
+> Цей звіт фіксує завершену ЛР-5 з Deployment. ЛР-6 продовжує її й перемикає
+> поточний GitOps Application на Rollout; команди звернення до Deployment
+> у цьому звіті стосуються попереднього стану. Актуальний стенд і команди:
+> [devops-lab6.md](devops-lab6.md). Сам `values-minikube.yaml` зберігає режим ЛР-5.
+
 Розгортання License Service переведено під керування Argo CD: конфігурація з Git автоматично застосовується до Kubernetes. Реалізовано App of Apps, оновлення образу, виявлення дрейфу, self-healing та відкат комітом.
 
 Команди для **Windows CMD** з кореня `C:\MTGMODS\labs-license-management-platform`. Потрібні Git, PowerShell 7 (`pwsh`), Docker Desktop Linux containers, Minikube, kubectl та Helm. Кластер потребує 4 CPU / 6 GiB RAM; навантажувальні стенди Highload мають бути зупинені. Код застосунку та production не змінюються.
