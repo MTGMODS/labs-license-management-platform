@@ -3,11 +3,28 @@ param(
     [ValidateRange(1, 10000)]
     [int]$Count = 100,
     [ValidateRange(0, 10000)]
-    [int]$DelayMs = 100
+    [int]$DelayMs = 100,
+    [switch]$WaitForStable
 )
 
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
+if ($WaitForStable) {
+    Write-Host 'Waiting for all ready API pods to belong to the stable ReplicaSet...'
+    $stableDeadline = [DateTime]::UtcNow.AddSeconds(120)
+    do {
+        $rollout = kubectl --context $Profile -n mtgmods-gitops get rollout mtgmods-license -o json | ConvertFrom-Json
+        $pods = kubectl --context $Profile -n mtgmods-gitops get pods -l app.kubernetes.io/component=api -o json | ConvertFrom-Json
+        $readyPods = @($pods.items | Where-Object {
+            -not $_.metadata.deletionTimestamp -and
+            @($_.status.conditions | Where-Object { $_.type -eq 'Ready' -and $_.status -eq 'True' }).Count -gt 0
+        })
+        $otherVersions = @($readyPods | Where-Object { $_.metadata.labels.'rollouts-pod-template-hash' -ne $rollout.status.stableRS })
+        if ($rollout.status.stableRS -and $readyPods.Count -eq $rollout.spec.replicas -and $otherVersions.Count -eq 0) { break }
+        if ([DateTime]::UtcNow -ge $stableDeadline) { throw 'Stable ReplicaSet did not recover within 120 seconds.' }
+        Start-Sleep -Seconds 1
+    } while ($true)
+}
 $podName = 'lab6-traffic-' + [guid]::NewGuid().ToString('N').Substring(0, 8)
 $script = @'
 import collections

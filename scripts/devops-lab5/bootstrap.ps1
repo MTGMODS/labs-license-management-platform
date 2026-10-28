@@ -13,6 +13,14 @@ $argoVersion = 'v3.5.6'
 New-Item -ItemType Directory -Force -Path $localDir, $cliDir | Out-Null
 $env:PATH = "$cliDir;$env:PATH"
 
+$listener = Get-NetTCPConnection -LocalPort 18090 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
+if ($listener) {
+    $ownerCommand = (Get-CimInstance Win32_Process -Filter "ProcessId=$($listener.OwningProcess)").CommandLine
+    if ($ownerCommand -notmatch "--context\s+$([regex]::Escape($Profile))\s" -or $ownerCommand -notmatch 'port-forward') {
+        throw "Port 18090 belongs to another process or cluster. Stop that port-forward before starting $Profile."
+    }
+}
+
 minikube start -p $Profile --driver=docker --cpus=4 --memory=6144 --container-runtime=containerd --kubernetes-version=v1.35.1
 
 $cli = Join-Path $cliDir 'argocd.exe'
