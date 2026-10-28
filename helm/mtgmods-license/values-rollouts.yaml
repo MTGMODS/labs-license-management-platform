@@ -2,10 +2,10 @@
 replicaCount: 5
 
 image:
-  tag: sha-07f44c2e07c73ad805d978dedb06ca231f3f8850
+  tag: sha-805ca0af230d9ece135982527f3c69ba6ca231b0
 
 config:
-  appVersion: devops-lab6-v2
+  appVersion: devops-lab6-v1
 
 rollout:
   enabled: true
