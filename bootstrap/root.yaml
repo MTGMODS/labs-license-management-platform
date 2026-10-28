@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/MTGMODS/labs-license-management-platform.git
-    targetRevision: codex/devops-lab6-progressive-delivery
+    targetRevision: main
     path: argocd-apps
   destination:
     server: https://kubernetes.default.svc
