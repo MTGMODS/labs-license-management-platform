@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/MTGMODS/labs-license-management-platform.git
-    targetRevision: main
+    targetRevision: e3e1fdedd01fa8db42e60ed1a1d1c967ebb7b352
     path: helm/mtgmods-license
     helm:
       valueFiles:
