@@ -254,6 +254,14 @@ self-healing і відкат виконуються через Git без руч
 Єдиний звіт за пунктами роботи, посилання на код, команди CMD та результати:
 [docs/devops-lab5.md](docs/devops-lab5.md).
 
+## Progressive delivery — DevOps №6
+
+Argo Rollouts встановлюється через App of Apps. Helm-чарт підтримує Canary
+з 5 репліками, ручною та часовими паузами, promote, abort і відкатом через Git.
+Окремий Minikube-профіль та перевірка запитів ізсередини кластера дозволяють
+відтворити експеримент на іншому ПК. Звіт за пунктами й команди Windows CMD:
+[docs/devops-lab6.md](docs/devops-lab6.md).
+
 ## License
 
 MIT — see `LICENSE` in the repository root.
